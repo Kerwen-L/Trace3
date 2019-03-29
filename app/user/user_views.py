@@ -10,6 +10,15 @@ import datetime
 
 # Create your views here.
 
+
+'''
+加入新功能
+
+
+
+
+'''
+
 '''
 def register(request):
     characterflag = request.GET.get("characterFlag")

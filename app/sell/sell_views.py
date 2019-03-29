@@ -164,7 +164,7 @@ def register_commodity(request):
     if request.method == "POST":
         models.SellData(**json.loads(request.body)).save()
         print("测试：已录入商品信息")
-    return  HttpResponse("测试：已录入商品信息")
+    return HttpResponse("测试：已录入商品信息")
 
 
 def sell_state(request):
