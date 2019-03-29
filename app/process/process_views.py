@@ -8,7 +8,9 @@ from django.template import Context
 # from django.utils import simplejson
 import json
 # Create your views here.
-
+'''
+add functions
+'''
 
 # 人员-查询
 def Processor_Inquiry(request):
