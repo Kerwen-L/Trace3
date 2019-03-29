@@ -311,7 +311,7 @@ class ProcessData(models.Model):
 # 运输数据表
 class TransportData(models.Model):
     TransactionID=models.CharField(max_length=50)
-    BatchNum = models.IntegerField(default=0)
+    # BatchNum = models.IntegerField(default=0)
     ProductionID=models.CharField(max_length=50)                      #生产内容ID
     TransactionPersonID=models.CharField(max_length=50,default='')    #运输人员ID(与信息表中的id建立关联)
     From=models.CharField(max_length=50)
