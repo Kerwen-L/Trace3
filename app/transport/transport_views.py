@@ -3,6 +3,11 @@ from django.shortcuts import HttpResponse, render, redirect
 from app import models
 from django.shortcuts import render_to_response
 
+
+'''
+添加了一部分内容
+11111
+'''
 import json
 from datetime import date
 from datetime import datetime

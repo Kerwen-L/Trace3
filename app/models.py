@@ -141,6 +141,7 @@ class TransporterRegistry(ConsumerRegistry):
     RoadTransportQCNo=models.BigIntegerField()
     RoadTransportQCSrc=models.CharField(max_length=40)
     TransportCounts=models.IntegerField(default=0)
+    Flag = models.IntegerField(default=0)
     #Password=models.CharField(max_length=30)
     imgID = models.ImageField(upload_to='images/', default="")
     imgwork = models.ImageField(upload_to='images/', default="")
@@ -311,12 +312,12 @@ class ProcessData(models.Model):
 # 运输数据表
 class TransportData(models.Model):
     TransactionID=models.CharField(max_length=50)
-    BatchNum = models.IntegerField(default=0)
+    # BatchNum = models.IntegerField(default=0)
     ProductionID=models.CharField(max_length=50)                      #生产内容ID
     TransactionPersonID=models.CharField(max_length=50,default='')    #运输人员ID(与信息表中的id建立关联)
     From=models.CharField(max_length=50)
     To=models.CharField(max_length=50)
-    Flag=models.CharField(max_length=50)                              #环节标志
+    Flag=models.IntegerField(default=0)                               #环节标志
     TransactionStartTime=models.DateField(default=date.today)         #流通开始时间
     TransactionEndTime=models.DateField(default=date.today)
     TransactionStartUCLLink=models.CharField(max_length=50)           #起点UCL索引
