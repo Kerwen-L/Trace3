@@ -2,16 +2,12 @@ from __future__ import unicode_literals
 from django.shortcuts import HttpResponse, render, redirect
 from app import models
 from django.shortcuts import render_to_response
-
-
-'''
-添加了一部分内容
-11111
-'''
 import json
 from datetime import date
 from datetime import datetime
-class ComplexEncoder(json.JSONEncoder):
+
+
+class ComplexEncoder(json.JSONEncoder):                             #时间解析函数
     def default(self, obj):
         if isinstance(obj, datetime):
             return obj.strftime('%Y-%m-%d %H:%M:%S')
@@ -19,27 +15,92 @@ class ComplexEncoder(json.JSONEncoder):
             return obj.strftime('%Y-%m-%d')
         else:
             return json.JSONEncoder.default(self, obj)
-def toJSON(self):
-    return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]),cls=ComplexEncoder)
+
+
+'''运输员队列生成'''
+transpoter_list = []
+def transporter_list_generate():
+    flag = 0    #
+    templist = models.TransporterRegistry.objects.filter(Flag=0)                   # 从运输数据库中取出所有空闲记录
+    if templist:
+        for temp in templist:                                                   # 取出这些记录的生产内容id并形成list返回
+            tempid = temp.ConsumerId
+            transpoter_list.append(tempid)
+        flag = 1
+        print("运输员队列已生成，包含以下id")
+        print(transpoter_list)
+    else:
+        flag = 0
+    return flag
+
+
+'''运输员状态释放，根据运输人员ID'''
+def transpoter_release(number):
+    models.TransporterRegistry.objects.filter(ConsumerId=number).update(Flag=0)
+
+
+'''运输员选择'''
+def transpoter_select_inproduct():                                          #返回运输员的记录，由前端决定显示的具体内容
+    print("调用运输员选择函数")
+    if transpoter_list.__len__() == 0:
+        have_people = transporter_list_generate()                           #队列有内容，返回1，队列为空，返回0
+        print("运输员列表已从0更新")
+
+    if transpoter_list.__len__() >0:
+        id = transpoter_list[0]                                                 #选择第一个运输员
+        if models.TransporterRegistry.objects.filter(ConsumerId=id).update(Flag=1):     #修改标志位
+            print("运输员标志位已经修改")
+        transpoter_recorder = models.TransporterRegistry.objects.get(ConsumerId=id) #查找记录
+        if transpoter_recorder:
+            print("找到运输员的信息")
+        info_str = transpoter_recorder.to_front()                            #获取字符串形式的信息给前端
+        print("运输员的姓名" + transpoter_recorder.ConsumerName)
+        del transpoter_list[0]                                                  #从队列中删除
+        return info_str  # 返回信息字符串
+    else:
+        return HttpResponse("没有运输员处于空闲状态，请等待。。。") # 返回信息字符串
+
+def transpoter_regis(request):
+    if request.method == "POST":
+        models.TransporterRegistry(**json.loads(request.body)).save()
+        print("运输员添加成功")
+    return HttpResponse("运输员添加成功")
+
+
+'''运输员信息修改'''
+'''如果id和password匹配的话进行修改'''
+def transpoter_info_alter(request):
+    if request.method == "POST":
+        dict_get = json.loads(request.body)             # 获得字典
+        peoson_id = dict_get['ConsumerId']
+        temp_people = models.TransporterRegistry.objects.filter(ConsumerId=peoson_id)
+        if temp_people.Password == dict_get['Password'] and dict_get['NewPwd'] != dict_get['NewPwdAgain']:
+            temp_people.update( ConsumerName=dict_get['ConsumerName'],
+                                ConsumerId=dict_get['ConsumerId'],
+                                ContactNo=dict_get['ContactNo'],
+                                TransportCounts=dict_get['TransportCounts'],
+                                RoadTransportQCNo=dict_get['RoadTransportQCNo'],
+                                Password=dict_get['NewPwd']
+                              )
+        elif dict_get['NewPwd'] != dict_get['NewPwdAgain']:
+            return HttpResponse("新密码不一致")
+        elif temp_people.Password != dict_get['Password']:
+            return HttpResponse("密码输入错误")
+
 
 '''运输人员申请'''
 def transpoter_apply(request):
-    person_info = models.transpoter_select_inproduct()
-    return HttpResponse(person_info)                    #返回选择运输人员的全部信息
+    print("运输员申请与分配函数")
+    if request.method=="GET":
+        person_info = transpoter_select_inproduct()
+        return HttpResponse(person_info)                    #返回选择运输人员的全部信息
 
 '''商品信息扫码录入  前端发送生产内容id和人员id'''
 def product_enter(request):
     if request.method=="POST":
-        dict_get = json.loads(request.body)             # 获得字典
+        dict_get = json.loads(request.body)             #获得字典
         models.TransportData.objects.create(**dict_get) #新增记录
     return HttpResponse("录入完毕")
-
-
-'''模拟扫码  两个id'''
-def data_write(request):
-    dict_get = json.loads(request.body)
-    models.TransportData.objects.create(**dict_get)
-    return HttpResponse("保存完毕")
 
 '''
 @运输数据 开始
@@ -57,7 +118,7 @@ def Transport_start(request):
         From=dict_get['From'],
         To=dict_get['To'],
         TransactionStartTime=dict_get['TransactionStartTime'],
-        flag=1,
+        Flag=1,
     )
     if dict_get['From'].find("牧场") >= 0:                                                 #模糊查询 说明运输员在生产运输阶段
         print("开始更新生产数据 环节标志03")
@@ -109,6 +170,9 @@ def Transport_end(request):
     peoson_id=dict_get['TransactionPersonID']                                          # 解析运输人员id
     models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=1).update(  # 更新前端推送内容的到达时间
         TransactionEndTime=dict_get['TransactionEndTime'],
-        Flag=2,                                                                        # 标志商品到达环节终点
+        Flag=2, # 标志商品到达环节终点
+        TransactionEndUCLLink="UCL_end",
+
     )
-    models.transpoter_release(peoson_id)                                               # 运输人员状态释放
+    transpoter_release(peoson_id)                                                      # 运输人员状态释放
+    return HttpResponse("终点数据上传完成")
