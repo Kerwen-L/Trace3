@@ -338,14 +338,14 @@ def origin(request):
             else:
                 print("检疫表没有数据")
             #运输表的查询 生产-检疫
-            temp3 = models.TransportData.objects.filter(ProductionId=production_id)
+            temp3 = models.TransportData.objects.filter(ProductionID=production_id)
             if (temp3):
                 for sample3 in temp3:
                     i = model_to_dict(sample3)
                     i.pop("id")
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
             else:
-                print("加工表没有数据")
+                print("运输表没有数据")
             #销售表溯源
             temp4 = models.QuarantineData.objects.filter(ProductionId=production_id)
             if (temp4):
@@ -354,7 +354,7 @@ def origin(request):
                     i.pop("id")
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
             else:
-                print("加工表没有数据")
+                print("销售表没有数据")
             return HttpResponse(ret, content_type="application/json", charset="utf-8")
         except ObjectDoesNotExist:
             return HttpResponse("数据查询失败")
