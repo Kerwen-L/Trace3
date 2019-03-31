@@ -158,10 +158,10 @@ class TransporterRegistry(ConsumerRegistry):
 
 
 # 检疫员注册表
-class QuarantineRegistry(models.Model):
-    #QuarantineID = models.CharField(max_length=10)
+class QuarantineRegistry(ConsumerRegistry):
+    QuarantinePersonID = models.CharField(max_length=15)
     #Password = models.CharField(max_length=128)
-    #QuarantineName = models.CharField(max_length=16)
+    QuarantinerName = models.CharField(max_length=16)
     IDNo = models.CharField(max_length=18)
     #ContactNo = models.BigIntegerField(null=True, blank=True)
     RegisterTime = models.DateField(default=date.today)
@@ -284,7 +284,7 @@ class QuarantineData(models.Model):
         return self.QuarantineID
 
     def toJSON(self):
-        return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]), cls=ComplexEncoder)
+        return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]), cls=DateEncoder)
 
 
 # 加工数据表
@@ -330,7 +330,7 @@ class TransportData(models.Model):
         return dict2
 
     def toJSON(self):
-        return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]),cls=ComplexEncoder)
+        return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]),cls=DateEncoder)
 
 
 # 销售数据表
@@ -377,14 +377,7 @@ class DateEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
 
-class ComplexEncoder(json.JSONEncoder):                  #时间解析函数
-    def default(self, obj):
-        if isinstance(obj, datetime):
-            return obj.strftime('%Y-%m-%d %H:%M:%S')
-        elif isinstance(obj, date):
-            return obj.strftime('%Y-%m-%d')
-        else:
-            return json.JSONEncoder.default(self, obj)
+
 
 
 
