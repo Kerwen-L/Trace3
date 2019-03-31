@@ -189,7 +189,7 @@ class QuarantineRegistry(models.Model):
 class ProcessorRegistry(ConsumerRegistry):
     #ProcessorId = models.CharField(max_length=30)                                #加工员注册ID
     #ProcessorName = models.CharField(max_length=10)                       #姓名
-    IDNo = models.BigIntegerField()                                       #身份证号
+    IDNo = models.CharField(max_length=18)                                 #身份证号
     #ContactNo = models.BigIntegerField()                                  #联系方式
     RegisterTime = models.DateField(default=date.today)                   #注册时间
     WorkPlaceID = models.CharField(max_length=50)                         #工作单位ID
@@ -218,15 +218,15 @@ class SellerRegistry(ConsumerRegistry):
     # SellerName = models.CharField(max_length=10)  # 姓名
     # SellerName = ConsumerRegistry.ConsumerName
     # IDNo = models.BigIntegerField()                         #身份证号
-    IDNo = models.CharField(max_length=18)  # 身份证号
+    IDNo = models.CharField(max_length=18)                          # 身份证号
     # ContactNo = models.BigIntegerField()                    #联系方式
     # RegisterTime = models.DateTimeField()  # 销售人员注册时间
-    RegisterTime = models.DateTimeField(default=timezone.now)  # 销售人员注册时间
-    WorkPlaceID = models.CharField(max_length=50)  # 工作单位ID(企业注册ID)
-    PhotoSrc = models.CharField(max_length=100)  # 销售人员证件照地址
+    RegisterTime = models.DateField(default=date.today)             # 销售人员注册时间
+    WorkPlaceID = models.CharField(max_length=50)                   # 工作单位ID(企业注册ID)
+    PhotoSrc = models.CharField(max_length=100)                     # 销售人员证件照地址
     # Password = models.CharField(max_length=30)              #登陆密码(需加密保存)
     imgID = models.ImageField(upload_to='images/', default="")
-    imgwork = models.ImageField(upload_to='images/', default="")  # 销售员没有工作单位
+    imgwork = models.ImageField(upload_to='images/', default="")    # 销售员没有工作单位
     companyregistry = models.ForeignKey("CompanyRegistry", on_delete=models.CASCADE,
                                         related_name="seller", null=True)  # 一个农场有好多生产者
     inherit = Uni_Manager()
@@ -291,7 +291,7 @@ class QuarantineData(models.Model):
 class ProcessData(models.Model):
     ProcessID = models.CharField(max_length=22,unique=True, null=True, blank=True)   #加工编号(屠宰点编号7+生产内容ID10+屠宰点宰杀顺序)
     ProductionID = models.CharField(max_length=10)                 #生成内容ID 羊ID+00(8+2)
-    ProcessPersonID = models.CharField(max_length=10)              #加工人员ID 继承与消费者ID
+    ConsumerID = models.CharField(max_length=10)                   #加工人员ID 继承与消费者ID
 #    ProcessPersonID = models.ForeignKey('ProcessorRegistry',on_delete=models.CASCADE,)
     ProcessLocation = models.CharField(max_length=7)               #加工地 (企业编号7)
     ProcessTime = models.DateField(default=date.today)             #加工时间
@@ -347,7 +347,7 @@ class SellData(models.Model):
     AccountabilityFlag = models.IntegerField(default=0)  # 追责标志位
     SellUCLLink = models.CharField(max_length=100,null=True,blank=True)  # 销售UCL索引
     GoodsName = models.CharField(max_length=50,null=True,blank=True)      #商品名称
-    ConsumerID = models.CharField(max_length=10,unique=True,null=True,blank=True)   # 销售员ID
+    ConsumerID = models.CharField(max_length=10,null=True,blank=True)   # 销售员ID
 
 
 '''
