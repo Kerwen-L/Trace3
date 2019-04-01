@@ -32,20 +32,27 @@ def Processor_Add(request):
     else:
         return HttpResponse("mothod应该为POST")
 '''
-# 人员-查询
+
 def Processor_Inquiry(request):
     if request.method == "GET":
         consumer_id = request.GET.get("ConsumerId")  # 获得加工人员的processor_idTrace2@223.3.79.211
+        print(consumer_id)
         try:
             temp1 = models.ProcessorRegistry.objects.get(ConsumerId=consumer_id)
             demo = model_to_dict(temp1)
             demo.pop("id")
             demo.pop("consumerregistry_ptr")
-            return HttpResponse(json.dumps(demo,cls=models.DateEncoder,ensure_ascii = False),content_type="application/json",charset="utf-8")
+            demo.pop("imgID")
+            demo.pop("imgwork")
+            demo.pop("imgquality")
+            print("加工人员信息查询成功")
+            return HttpResponse(json.dumps(demo, cls=models.DateEncoder, ensure_ascii=False), content_type="application/json", charset="utf-8")
         except ObjectDoesNotExist:
             return HttpResponse("未查询到符合条件的数据")
     else:
         return HttpResponse("mothod应该为GET")
+
+
 
 # 人员-删除
 def Processor_Delete(request):
@@ -66,7 +73,7 @@ def Processor_Update(request):
             demo = json.loads(request.body)  # 前台传入的数据 demo
             demo_id = demo.get("ConsumerId")  # 获得传入加工人员的processor_id
             temp1 = models.ProcessorRegistry.objects.get(ConsumerId=demo_id)  # 在数据库查找对象temp1
-#            temp1.ConsumerName = demo.get("ConsumerName")  # 更改姓名
+            temp1.ConsumerName = demo.get("ConsumerName")  # 更改姓名
             temp1.IDNo = demo.get("IDNo")  # 更改身份证号
             temp1.ContactNo = demo.get("ContactNo")  # 更改联系电话
             temp1.WorkPlaceID = demo.get("WorkPlaceID")  # 更改工作单位ID
@@ -112,8 +119,9 @@ def ProcessData_Inquiry(request):
             for sample in temp:
                 i = model_to_dict(sample)
                 i.pop("id")
-                ret.append(json.dumps(i,cls=models.DateEncoder,ensure_ascii = False))
-            return HttpResponse(ret, content_type="application/json",charset="utf-8")
+                ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii = False))
+            print("加工结果查询成功")
+            return HttpResponse(ret, content_type="application/json", charset="utf-8")
         else:
             return HttpResponse("未查询到符合条件的数据")
     else:
