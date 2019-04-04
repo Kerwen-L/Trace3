@@ -154,95 +154,99 @@ def fulfil(request):  # 个人信息完善函数,这个函数也要返回完善�
     # imgID=request.FILES.get("imgID")
     # imgwork = request.FILES.get("imgwork")
     characterflag = request.GET.get("CharacterFlag")  # 表明要完善哪个角色
-    print(type(characterflag))
     # 0为生产者；1为检疫员；2为加工员；3为运输员；4为销售员；5为普通用户
     # 这个时候这个json里是有个人的ID的,因为登陆进去之后我是传了这个人的ID给前端的
     dicttemp = json.loads(request.body.decode())
+    print(dicttemp)
     ConsumerId = dicttemp["ConsumerId"]
-    dicttemp.pop("ConsumerId")  # 把ConsumerId这个键值对删掉，删掉后的字典就是完完全全的个人信息完善的内容
+    dicttemp.pop("ConsumerId")  # 把ConsumerId这个键值对删掉，免得后面重复
     temp = models.ConsumerRegistry.objects.get(ConsumerId=ConsumerId)  # 在消费者表里找到该表项，该人
+    #print(temp.__dict__)
 
-    # 这里可能需要把temp删掉，然后把temp的数据存在一个字典里。。。，然后下面的子类再create
-    # temp.__dict__.pop("_state")
-    # temp.__dict__.pop("id")
-    # temp.__dict__.pop("Password")
-    # 要么不定义consumerresistryid
 
     CompanyName = dicttemp["CompanyName"]
     dicttemp.pop("CompanyName")  # 后面注册的时候公司名称是要去掉的
-    # 注册的时候外键还得设置好啊！！！！
 
     dic = temp.__dict__
-    temp.delete()
     dic.pop("_state")
-    dic.pop("id")
+    #dic.pop("id")
     dicttemp.update(dic)
-    for key, value in dicttemp.items():
-        print(key, value)
+    # for key, value in dicttemp.items():
+    #     print(key, value)
+    # for key,value in temp.__dict__.items():
+    #     print(key,value)
 
     def producer():
-        # CompanyName=dicttemp["CompanyName"]
-        # company=models.CompanyRegistry.objects.get(CompanyName=CompanyName)
-        # if models.ProducerRegistry.inherit.create(CompanyName, **dicttemp)==0:
-        #     return HttpResponse("该农场不存在")
-        # else:
-        #     temp.CharacterFlag |= 0b100000  # 把第一位置0
-        models.ProducerRegistry(**dicttemp).save()  # 还要判断公司呢
-        temp.CharacterFlag |= 0b100000  # 把第一位置0
+        aaa = models.ProducerRegistry.inherit.update(models.ProducerRegistry,CompanyName,**dicttemp)
+        if aaa == 0:
+            return 0
+        else:
+            #aaa.CharacterFlag |= 0b100000  # 把第一位置1
+            aaa.save()
+
 
     def quarantine():
-        if models.ProducerRegistry.inherit.create(CompanyName, **dicttemp) == 0:
-            return HttpResponse("该检疫局不存在")
+        aaa = models.QuarantineRegistry.inherit.update(models.ProducerRegistry, CompanyName, **dicttemp)
+        if aaa == 0:
+            return 0
         else:
-            temp.CharacterFlag |= 0b010000  # 把第二位置0
+            aaa.CharacterFlag |= 0b010000  # 把第二位置1
+            aaa.save()
+
 
     def processor():
-        if models.ProducerRegistry.inherit.create(CompanyName, **dicttemp) == 0:
-            return HttpResponse("该加工厂不存在")
+        aaa = models.ProcessorRegistry.inherit.update(models.ProducerRegistry, CompanyName, **dicttemp)
+        if aaa == 0:
+            return 0
         else:
-            temp.CharacterFlag |= 0b001000  # 把第三位置0
+            aaa.CharacterFlag |= 0b001000  # 把第三位置1
+            aaa.save()
+
 
     def trans():
-        if models.ProducerRegistry.inherit.create(CompanyName, **dicttemp) == 0:
-            return HttpResponse("该物流公司不存在")
+        aaa = models.TransporterRegistry.inherit.update(models.ProducerRegistry, CompanyName, **dicttemp)
+        if aaa == 0:
+            return 0
         else:
-            temp.CharacterFlag |= 0b000100  # 把第四位置0
+            aaa.CharacterFlag |= 0b000100  # 把第四位置1
+            aaa.save()
+
 
     def seller():
-        if models.SellerRegistry.inherit.create(CompanyName, **dicttemp) == 0:
-            return HttpResponse("该物流公司不存在")
+        aaa = models.SellerRegistry.inherit.update(models.ProducerRegistry, CompanyName, **dicttemp)
+        if aaa == 0:
+            return 0
         else:
-            temp.CharacterFlag |= 0b000010  # 把第五位置0
+            aaa.CharacterFlag |= 0b000010  # 把第五位置1
+            aaa.save()
 
-    '''
-    def consumer():
-        models.ConsumerRegistry(**json.loads(request.body)).save()
-    '''
-    # switcher = {
-    #     "0": producer(),
-    #     "1": quarantine(),
-    #     "2": processor(),
-    #     "3": trans(),
-    #     "4": seller(),
-    # }
-    # switcher.get(characterflag, "error")  # 替代switch/case,Expression is not callable
+
     if characterflag == "0":
-        producer()
+        if producer()==0:
+            return HttpResponse("该农场不存在！")
     elif characterflag == "1":
-        quarantine()
+        if quarantine()==0:
+            return HttpResponse("该检疫局不存在！")
     elif characterflag == "2":
-        processor()
+        if processor()==0:
+            return HttpResponse("该加工厂不存在！")
     elif characterflag == "3":
-        trans()
+        if trans()==0:
+            return HttpResponse("该物流公司不存在！")
     elif characterflag == "4":
-        seller()
+        if seller()==0:
+            return HttpResponse("该销售点不存在！")
     dict_ = {"ConsumerId": ConsumerId}
+
     return HttpResponse(json.dumps(dict_, ensure_ascii=False), content_type="application/json")  # 返回ID
 
 
+
 def fulfil_img(request):
+    #http://127.0.0.1:8000/user/media/images/1.png
     ConsumerId = request.POST.get("ConsumerId")
     characterflag = request.POST.get("CharacterFlag")  # 表明要完善哪个角色
+    print(ConsumerId,characterflag)
     imgID = request.FILES.get("imgID")
     imgwork = request.FILES.get("imgwork")
 
@@ -284,14 +288,24 @@ def fulfil_img(request):
         temp.imgwork = imgwork
         temp.save()
 
-    switcher = {
-        "0": producer(),
-        "1": quarantine(),
-        "2": processor(),
-        "3": trans(),
-        "4": seller(),
-    }
-    switcher.get(characterflag, "error")  # 替代switch/case,Expression is not callable
+    # switcher = {
+    #     "0": producer(),
+    #     "1": quarantine(),
+    #     "2": processor(),
+    #     "3": trans(),
+    #     "4": seller(),
+    # }
+    # switcher.get(characterflag, "error")  # 替代switch/case,Expression is not callable
+    if characterflag=="0":
+        producer()
+    elif characterflag=="1":
+        quarantine()
+    elif characterflag=="2":
+        processor()
+    elif characterflag=="3":
+        trans()
+    elif characterflag=="4":
+        seller()
     dict_ = {"ConsumerId": ConsumerId}
     return HttpResponse(json.dumps(dict_, ensure_ascii=False), content_type="application/json")  # 返回ID
 #消费者-更改
