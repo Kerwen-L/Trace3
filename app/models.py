@@ -9,6 +9,17 @@ import json
 
 
 class Uni_Manager(models.Manager):
+    def update(self,registry,company,**kwargs):
+        com = CompanyRegistry.objects.filter(CompanyName=company)
+        if com.count() == 0:  # 公司表里没有这个公司
+            return 0
+        else:
+            comid = com.first().id
+            aaa = registry(**kwargs,companyregistry_id=comid)
+            aaa.save()
+            return aaa
+
+
     def create(self,company,**kwargs):
         #kwargs.update(classroom_ptr_id=temp.id,c_id=temp.c_id,c_number=temp.c_number)
         # if company==-1:#表示是销售员的个人信息完善
@@ -43,7 +54,7 @@ class ConsumerRegistry(models.Model):
     ConsumerId = models.CharField(max_length=10,unique=True)            # 消费者注册ID
     ConsumerName = models.CharField(max_length=10)                      # 姓名
     ContactNo = models.CharField(max_length=11)                         # 联系方式
-    RegisterTimeConsumer = models.DateField(default=date.today())       # 消费者注册时间
+    RegisterTimeConsumer = models.DateField(default=date.today)       # 消费者注册时间
     SearchCounts = models.IntegerField(default=0)                       # 查询次数
     VIP = models.BooleanField(default=False)                            # 会员标志位
     Password = models.CharField(max_length=30)                          # 登陆密码
@@ -158,7 +169,7 @@ class TransporterRegistry(ConsumerRegistry):
 
 
 # 检疫员注册表
-class QuarantineRegistry(models.Model):
+class QuarantineRegistry(ConsumerRegistry):
     #QuarantineID = models.CharField(max_length=10)
     #Password = models.CharField(max_length=128)
     #QuarantineName = models.CharField(max_length=16)
@@ -192,11 +203,11 @@ class ProcessorRegistry(ConsumerRegistry):
     IDNo = models.BigIntegerField()                                       #身份证号
     #ContactNo = models.BigIntegerField()                                  #联系方式
     RegisterTime = models.DateField(default=date.today)                   #注册时间
-    WorkPlaceID = models.CharField(max_length=50)                         #工作单位ID
+    WorkPlaceID = models.CharField(max_length=50, null=True)                         #工作单位ID
     PhotoSrc = models.CharField(max_length=50,null=True,blank=True)       #加工人员证件照地址
-    HC4foodCertificationNo = models.BigIntegerField()                     #食品从业人员健康证明编号
-    HC4foodCertificationSrc = models.CharField(max_length=50)             #食品从业人员健康证明图片地址
-    ProcessorCounts = models.IntegerField(default=0)                      #加工操作次数
+    HC4foodCertificationNo = models.BigIntegerField(null=True)                     #食品从业人员健康证明编号
+    HC4foodCertificationSrc = models.CharField(max_length=50,null=True)             #食品从业人员健康证明图片地址
+    ProcessorCounts = models.IntegerField(default=0,null=True)                      #加工操作次数
     #Password = models.CharField(max_length=30)
     imgID = models.ImageField(upload_to='images/', default="")
     imgwork = models.ImageField(upload_to='images/', default="")

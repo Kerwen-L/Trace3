@@ -10,6 +10,6 @@ urlpatterns = [
     url(r'^login',user_views.login),
     url(r'^fulfil',user_views.fulfil),
 
-    url(r'^fulfil_img', user_views.fulfil_img),
+    url(r'^img_fulfil', user_views.fulfil_img),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
