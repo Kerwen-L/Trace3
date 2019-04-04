@@ -125,33 +125,37 @@ def Transport_start(request):
         list1 = models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=1)  #取出本次运输的全部生产商品记录
         for record in list1:
             models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
-                TransactionID=record.ProductionID + '03',
+                TransactionID=record.ProductionID + '30',
+                Transport_Flag=30,
                 TransactionStartUCLLink="UCL_product_begin",)
 
     elif dict_get['From'].find("检疫") >= 0:                                               #模糊查询 说明运输员在检疫运输阶段
-        print("开始更新检疫数据 环节标志13")
+        print("开始更新检疫数据 环节标志31")
         list1 = models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=1)  #取出本次运输的全部检疫商品记录
         for record in list1:
             models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
-                TransactionID=record.ProductionID + '13',
+                TransactionID=record.ProductionID + '31',
+                Transport_Flag=31,
                 TransactionStartUCLLink = "UCL_quarantine_begin",)
 
 
     elif dict_get['From'].find("加工") >= 0:                                               #模糊查询 说明运输员在加工运输阶段
-        print("开始更新加工数据 环节标志23")
+        print("开始更新加工数据 环节标志32")
         list1 = models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=1)  #取出本次运输的全部加工商品记录
         for record in list1:
             models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
-                TransactionID=record.ProductionID + '23',
+                TransactionID=record.ProductionID + '32',
+                Transport_Flag=32,
                 TransactionStartUCLLink="UCL_process_begin",)
 
 
     elif dict_get['From'].find("超市") >= 0:                                               #模糊查询 说明运输员在销售运输阶段
-        print("开始更新销售数据 环节标志43")
+        print("开始更新销售数据 环节标志34")
         list1 = models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=1)  #取出本次运输的全部销售商品记录
         for record in list1:
             models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
-                TransactionID=record.ProductionID + '43',
+                TransactionID=record.ProductionID + '34',
+                Transport_Flag=34,
                 TransactionStartUCLLink="UCL_sell_begin",)
     else:
         print("数据填写不规范")
