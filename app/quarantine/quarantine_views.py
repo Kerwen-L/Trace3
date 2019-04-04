@@ -20,11 +20,17 @@ from django.shortcuts import render_to_response
 from django.template import Context
 from django.forms.models import model_to_dict
 import json
+from app.ucl import ucl
 # Create your views here.
 
 def quarantine_submit(request):
     if request.method == "POST":
-        quarantinedata.submit(json.loads(request.body))
+        data = json.loads(request.body)
+        uclstr, link = ucl.request_to_uclstr(data)
+        print("uclStrBase64:" + uclstr)
+        contentdict = ucl.unpack(uclstr, link)
+        print(contentdict)
+        quarantinedata.submit(contentdict)
         print("检疫数据上传数据库成功!")
     return HttpResponse("检疫数据上传数据库成功!")
 
