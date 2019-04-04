@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 from django.shortcuts import HttpResponse, render, redirect
 from app import models
+from django.forms.models import model_to_dict
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render_to_response
 from django.template import Context
 # from django.utils import simplejson
@@ -292,6 +294,73 @@ def fulfil_img(request):
     switcher.get(characterflag, "error")  # 替代switch/case,Expression is not callable
     dict_ = {"ConsumerId": ConsumerId}
     return HttpResponse(json.dumps(dict_, ensure_ascii=False), content_type="application/json")  # 返回ID
+#消费者-更改
+def update(request):
+    if request.method=="POST":
+        try:
+            co = json.loads(request.body)  #获得json
+            co_id=co.get("ConsumerId")  #获得id
+            temp2 =models.ConsumerRegistry.objects.get(ConsumerId=co_id) #获得对象
+            temp2.Password = co.get("Password")
+            temp2.ContactNo=co.get("ContactNo")
+            temp2.save()
+            print("密码修改成功")
+            return HttpResponse("密码更改成功")
+        except ObjectDoesNotExist:
+            return HttpResponse("修改不成功")
+
+#消费者-溯源
+def origin(request):
+    if request.method == "GET":
+        production_id = request.GET.get("ProductionID")  # 获得加工人员的processor_idTrace2@223.3.79.211
+        print(production_id)
+#        return HttpResponse("数据查询开始")
+        try:
+            ret = []
+            #生产表的查询
+
+            #加工表数据查询
+            temp1 = models.ProcessData.objects.filter(ProductionID=production_id)
+            if (temp1):
+                for sample1 in temp1:
+                    i = model_to_dict(sample1)
+                    i.pop("id")
+                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+            else:
+                print("加工表没有数据")
+            #检疫表的溯源 出栏检疫
+            temp2=models.QuarantineData.objects.filter(ProductionId=production_id)
+            if (temp2):
+                for sample2 in temp2:
+                    i = model_to_dict(sample2)
+                    i.pop("id")
+                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+            else:
+                print("检疫表没有数据")
+            #运输表的查询 生产-检疫
+            temp3 = models.TransportData.objects.filter(ProductionID=production_id)
+            if (temp3):
+                for sample3 in temp3:
+                    i = model_to_dict(sample3)
+                    i.pop("id")
+                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+            else:
+                print("运输表没有数据")
+            #销售表溯源
+            temp4 = models.QuarantineData.objects.filter(ProductionId=production_id)
+            if (temp4):
+                for sample4 in temp4:
+                    i = model_to_dict(sample4)
+                    i.pop("id")
+                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+            else:
+                print("销售表没有数据")
+            return HttpResponse(ret, content_type="application/json", charset="utf-8")
+        except ObjectDoesNotExist:
+            return HttpResponse("数据查询失败")
+    else:
+        return HttpResponse("method 应该为GET")
+
 
 
 
