@@ -63,10 +63,10 @@ def producer_alter_personal(request):  # 只能改ContactNo和Password,
     dicttemp = json.loads(request.body.decode())
     ConsumerId = dicttemp["ConsumerId"]
     temp = models.ConsumerRegistry.objects.get(ConsumerId=ConsumerId)
+    #temp = models.ProducerRegistry.objects.get(ConsumerId=ConsumerId)
     temp.ContactNo = dicttemp["ContactNo"]  # 更改电话号码
     temp.Password = dicttemp["Password"]  # 更改密码
     temp.save()
-    # models.ConsumerRegistry.objects.filter(user='yangmv').update(pwd='520')
     dict_ = {"ConsumerId": ConsumerId}
     return HttpResponse(json.dumps(dict_, ensure_ascii=False),
                         content_type="application/json")  # 返回ID
@@ -78,13 +78,17 @@ def producer_alter_farm(request):  # 只能改CompanyName OperatingPlace，即�
     ConsumerId = dicttemp["ConsumerId"]
     CompanyName = dicttemp["CompanyName"]
     OperatingPlace = dicttemp["OperatingPlace"]
-    temp_consumer = models.ConsumerRegistry.objects.get(ConsumerId=ConsumerId)
+    temp_consumer = models.ProducerRegistry.objects.get(ConsumerId=ConsumerId)
     # temp_consumer.producerregistry.companyregistry.CompanyName=dicttemp["CompanyName"]#实际上不允许这样改的，因为这是一对多，怎么可能直接改1的值，应该在company里面搜索
     # 有没有要改的新的公司，如果有，外键对应上，如果没有，新创建一个，但是怎么确保这个公司不是乱填的呢？？？我的想法是：确保的时候可能需要查询一下公司表里有木有营业许可证啥的
     temp_company = models.CompanyRegistry.objects.filter(CompanyName=CompanyName)
     temp_place = models.CompanyRegistry.objects.filter(OperatingPlace=OperatingPlace)
     if temp_company.exists() and temp_place.exists() and temp_company[0].id == temp_place[0].id:  # 数据库里有新的企业名称和经营地址且匹配
-        temp_consumer.producerregistry.companyregistry = temp_company[0].id  # 将生产者的外键指向新的农场
+        # temp_consumer.producerregistry.companyregistry_id = temp_company[0].id  # 将生产者的外键指向新的农场
+        # temp_consumer.save()
+        temp_consumer.companyregistry = temp_company[0]  # 将生产者的外键指向新的农场
+        temp_consumer.save()
+
         # producerregistry是父类通过子类的小写表明访问子类的数据
         # dict_ = {"ConsumerId": ConsumerId}
         # return HttpResponse(json.dumps(dict_, ensure_ascii=False),content_type="application/json")  # 返回ID

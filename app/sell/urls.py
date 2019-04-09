@@ -27,7 +27,7 @@ urlpatterns = [
     # 查询商品信息
     url(r'^sell_state/$', sell_views.sell_state),
     # 按产地查询，测试
-    url(r'^sell_state_bylocation/$', sell_views.sell_state_bylocation),
+    # url(r'^sell_state_bylocation/$', sell_views.sell_state_bylocation),
     # 修改商品信息
-    url(r'^alter_sell_state/', sell_views.alter_sell_state)
+    # url(r'^alter_sell_state/', sell_views.alter_sell_state)
 ]

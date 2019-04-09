@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app'
+    'app',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +128,5 @@ STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')     # 设置静态文件路径为主目录下的media文件夹
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
