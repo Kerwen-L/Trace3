@@ -210,14 +210,15 @@ def sell_state_bylocation(request):
         if(temp):
             for sample in temp:
                 # i = json.loads(sample.toJSON())
-                i= model_to_dict(sample)
+                i = model_to_dict(sample)
                 i.pop("id")
-                ret.append(json.dumps(i,cls=models.DateEncoder))
+                ret.append(json.dumps(i, cls=models.DateEncoder))
             return HttpResponse(ret, content_type="application/json")
         else:
             return HttpResponse("测试：未查询到商品信息")
 
 
+'''
 def alter_sell_state(request):
     if request.method == "POST":
         alter = json.loads(request.body)
@@ -233,3 +234,4 @@ def alter_sell_state(request):
         temp.save()
         print("测试;已修改商品信息")
     return HttpResponse("测试;已修改商品信息")
+'''
