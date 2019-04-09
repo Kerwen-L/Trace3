@@ -261,6 +261,7 @@ class ProductionData(models.Model):
     BodyTemperature=models.FloatField()
     UCLLink=models.CharField(max_length=50)
     MonitorRecordTime=models.TimeField()#timestamp()
+    Flag = models.IntegerField(default=0)
     def __str__(self):  # print的时候好看，类似于C++的重载<<
             return self.RecordID
 
@@ -312,6 +313,7 @@ class QuarantineData(models.Model):
     QuarantineBatch = models.CharField(max_length=50)
     QuarantineUCLLink = models.CharField(max_length=100, null=True, blank=True)
     Applicant = models.CharField(max_length=30)
+    Flag = models.IntegerField(default=1)
 
     def __unicode__(self):
         return self.QuarantineID
@@ -322,7 +324,7 @@ class QuarantineData(models.Model):
 
 # 加工数据表
 class ProcessData(models.Model):
-    ProcessID = models.CharField(max_length=22,unique=True, null=True, blank=True)   #加工编号(屠宰点编号7+生产内容ID10+屠宰点宰杀顺序)
+    ProcessID = models.CharField(max_length=22, null=True, blank=True)   #加工编号(屠宰点编号7+生产内容ID10+屠宰点宰杀顺序)
     ProductionID = models.CharField(max_length=16)                 #生成内容ID 羊ID+00(8+2)
     ConsumerId = models.CharField(max_length=10)              #加工人员ID 继承与消费者ID
 #    ProcessPersonID = models.ForeignKey('ProcessorRegistry',on_delete=models.CASCADE,)
@@ -333,6 +335,7 @@ class ProcessData(models.Model):
     QRCodeLink = models.CharField(max_length=50)                     #二维码地址
     Step = models.IntegerField(default=0)  # 阶段
     ProcessUCLLink = models.CharField(max_length=50)               #UCL
+    Flag = models.IntegerField(default=3)
     def __str__(self): # print的时候好看，类似于C++的重载<<
         return self.ProcessID
     # model的内部写一个函数返回json
@@ -348,7 +351,7 @@ class TransportData(models.Model):
     TransactionPersonID=models.CharField(max_length=50,default='')    #运输人员ID(与信息表中的id建立关联)
     From=models.CharField(max_length=50)
     To=models.CharField(max_length=50)
-    Flag=models.IntegerField(default=0)                               #环节标志
+    Flag=models.IntegerField(default=2)                               #环节标志
     TransactionStartTime=models.DateTimeField(default=date.today)         #流通开始时间
     TransactionEndTime=models.DateTimeField(default=date.today)
     TransactionStartUCLLink=models.CharField(max_length=50)           #起点UCL索引
@@ -380,6 +383,7 @@ class SellData(models.Model):
     SellUCLLink = models.CharField(max_length=100,null=True,blank=True)  # 销售UCL索引
     GoodsName = models.CharField(max_length=50,null=True,blank=True)      #商品名称
     ConsumerID = models.CharField(max_length=10,null=True,blank=True)   # 销售员ID
+    Flag = models.IntegerField(default=4)
 
 
 '''
@@ -426,10 +430,7 @@ class DateEncoding(json.JSONEncoder):
             return o.strftime('%Y/%m/%d')
 
 
-class UUID_Sheep(models.Model):
-    UUID = models.CharField(max_length=50, null=True)
-    RecordID = models.CharField(max_length=25, null=True)
-    PB_Flag = models.IntegerField(default=0, null=True)
+
 
 
 
