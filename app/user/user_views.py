@@ -244,7 +244,7 @@ def fulfil_img(request):
     #http://127.0.0.1:8000/user/media/images/1.png
     ConsumerId = request.POST.get("ConsumerId")
     characterflag = request.POST.get("CharacterFlag")  # 表明要完善哪个角色
-    print(ConsumerId,characterflag)
+    print(ConsumerId, characterflag)
     imgID = request.FILES.get("imgID")
     imgwork = request.FILES.get("imgwork")
 
@@ -306,6 +306,11 @@ def fulfil_img(request):
         seller()
     dict_ = {"ConsumerId": ConsumerId}
     return HttpResponse(json.dumps(dict_, ensure_ascii=False), content_type="application/json")  # 返回ID
+
+def qrcode(request):
+    import qrcode
+    img = qrcode.make('{name:123}')
+    img.save('test.png')
 
 
 

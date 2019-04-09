@@ -22,7 +22,7 @@ class Uni_Manager(models.Manager):
 
     def create(self,company,**kwargs):
         #kwargs.update(classroom_ptr_id=temp.id,c_id=temp.c_id,c_number=temp.c_number)
-        # if company==-1:#表示是销售员的个人信息完善
+        # if company==-1:#表示是=售员的个人信息完善
         #     super().create(consumerregistry_ptr_id=temp.id, ConsumerId=temp.ConsumerId, ConsumerName=temp.ConsumerName,
         #                    ContactNo=temp.ContactNo, RegisterTimeConsumer=temp.RegisterTimeConsumer,
         #                    SearchCounts=temp.SearchCounts, VIP=temp.VIP, Password=temp.Password,
@@ -403,6 +403,12 @@ class DateEncoding(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, datetime.date):
             return o.strftime('%Y/%m/%d')
+
+
+class UUID_Sheep(models.Model):
+    UUID = models.CharField(max_length=50, null=True)
+    RecordID = models.CharField(max_length=25, null=True)
+    PB_Flag = models.IntegerField(default=0, null=True)
 
 
 
