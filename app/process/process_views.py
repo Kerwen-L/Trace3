@@ -7,7 +7,16 @@ from django.shortcuts import render_to_response
 from django.template import Context
 # from django.utils import simplejson
 import json
+from PIL import Image
+import qrcode #导入包
 # Create your views here.
+#定义二维码格式
+qr = qrcode.QRCode(
+    version=1, #控制二维码的大小，（1-40）
+    error_correction=qrcode.constants.ERROR_CORRECT_L, #控制二维码的纠错功能
+    box_size=10, #二维码的每个格子包含的像素数
+    border=4,    #控制边框包含的格子数
+)
 
 '''
 #人员-添加 #有问题 数据迁移会在consumer新建一行数据
@@ -101,6 +110,10 @@ def ProcessData_Add(request):
             temp1 = models.ProcessorRegistry.objects.get(ConsumerId = person)  # 在数据库查找对象temp1
             temp1.ProcessorCounts = temp1.ProcessorCounts + 1 #对应的加工人员的加工次数+1
             temp1.save()
+
+            img = qrcode.make('{ProductionId:132}')
+            img.save('test1.png')
+
             print("加工数据添加成功")
             return HttpResponse("加工数据上传数据库成功!")
         except ObjectDoesNotExist:
