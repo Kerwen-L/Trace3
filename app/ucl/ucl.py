@@ -12,7 +12,7 @@ def unpack(uclstr, link= 'quarantine', productionid='30000010', serial='40'):
     uclstr = uclstr.replace("\"", "<@@>")*
     """
     # 构造UCL存储路径, 并将UCL字符串存入txt文件
-    savepath = "F:\\UCLPack\\quarantine\\" + productionid + "\\"
+    savepath = "F:\\UCLPack\\" + link + "\\" + productionid + "\\"
     if (os.path.exists(savepath) == False):
         os.makedirs(savepath)
     uclpath = savepath + serial + '.txt'
@@ -28,6 +28,7 @@ def unpack(uclstr, link= 'quarantine', productionid='30000010', serial='40'):
     print(jsonstr)
     res.terminate()
 
+    # 字典形式返回内容对象域数据
     ucldict = json.loads(jsonstr)
     contentdict = json.loads(ucldict['cdps']['content'])
     return contentdict
@@ -38,8 +39,8 @@ def pack(jsonstr):
     byte_base64 = base64.b64encode(bytes(jsonstr, encoding='utf-8'))
     jsonstr_base64 = str(byte_base64, 'utf-8')
     cmd = "java -jar F:\\UCL_JAVA_201805211135.jar -pack"
-    unpack_cmd = [cmd, jsonstr_base64]
-    new_cmd = " ".join(unpack_cmd)
+    pack_cmd = [cmd, jsonstr_base64]
+    new_cmd = " ".join(pack_cmd)
     res = subprocess.Popen(new_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     jsonstr = str(res.stdout.readline(), encoding='gbk')
     print(jsonstr)
