@@ -3,7 +3,6 @@
 from django.conf.urls import url
 from app.quarantine import quarantine_views
 
-
 urlpatterns = [
 
     url(r'^quarantine/submit', quarantine_views.quarantine_submit),

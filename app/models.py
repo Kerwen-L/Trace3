@@ -143,19 +143,14 @@ class TransporterRegistry(ConsumerRegistry):
     TransportCounts=models.IntegerField(default=0)
     Flag = models.IntegerField(default=0)
     #Password=models.CharField(max_length=30)
-    #imgID = models.ImageField(upload_to='images/', default="")
-    #imgwork = models.ImageField(upload_to='images/', default="")
-    #imgquality = models.ImageField(upload_to='images/', default="")
-    #companyregistry = models.ForeignKey("CompanyRegistry", on_delete=models.CASCADE,
-                                        #related_name="transporter",null=True)  # 一个农场有好多生产者
+    imgID = models.ImageField(upload_to='images/', default="")
+    imgwork = models.ImageField(upload_to='images/', default="")
+    imgquality = models.ImageField(upload_to='images/', default="")
+    companyregistry = models.ForeignKey("CompanyRegistry", on_delete=models.CASCADE,
+                                        related_name="transporter",null=True)  # 一个农场有好多生产者
     inherit = Uni_Manager()
     def __str__(self):  # print的时候好看，类似于C++的重载<<
             return self.ConsumerId
-
-    def to_front(self):
-        listtemp = [f.name for f in self._meta.fields]
-        listtemp.remove('consumerregistry_ptr')
-        return json.dumps(dict([(attr, getattr(self, attr)) for attr in listtemp]), cls=DateEncoder)
 
     # model的内部写一个函数返回json
     def toJSON(self):
@@ -163,10 +158,10 @@ class TransporterRegistry(ConsumerRegistry):
 
 
 # 检疫员注册表
-class QuarantineRegistry(models.Model):
-    #QuarantineID = models.CharField(max_length=10)
+class QuarantineRegistry(ConsumerRegistry):
+    QuarantinePersonID = models.CharField(max_length=15)
     #Password = models.CharField(max_length=128)
-    #QuarantineName = models.CharField(max_length=16)
+    QuarantinerName = models.CharField(max_length=16)
     IDNo = models.CharField(max_length=18)
     #ContactNo = models.BigIntegerField(null=True, blank=True)
     RegisterTime = models.DateField(default=date.today)
@@ -289,7 +284,7 @@ class QuarantineData(models.Model):
         return self.QuarantineID
 
     def toJSON(self):
-        return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]), cls=ComplexEncoder)
+        return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]), cls=DateEncoder)
 
 
 # 加工数据表
@@ -323,16 +318,19 @@ class TransportData(models.Model):
     From=models.CharField(max_length=50)
     To=models.CharField(max_length=50)
     Flag=models.IntegerField(default=0)                               #环节标志
-    TransactionStartTime=models.DateTimeField(default=date.today)         #流通开始时间
-    TransactionEndTime=models.DateTimeField(default=date.today)
+    TransactionStartTime=models.DateField(default=date.today)         #流通开始时间
+    TransactionEndTime=models.DateField(default=date.today)
     TransactionStartUCLLink=models.CharField(max_length=50)           #起点UCL索引
     TransactionEndUCLLink=models.CharField(max_length=50)
     def __str__(self):
         return self.TransactionID
 
+    def info_dict(self):                                              #生成包含所有属性的字典
+        dict2 = dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]])
+        return dict2
 
     def toJSON(self):
-        return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]))
+        return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]),cls=DateEncoder)
 
 
 # 销售数据表
@@ -379,14 +377,8 @@ class DateEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
 
-class ComplexEncoder(json.JSONEncoder):                  #时间解析函数
-    def default(self, obj):
-        if isinstance(obj, datetime):
-            return obj.strftime('%Y-%m-%d %H:%M:%S')
-        elif isinstance(obj, date):
-            return obj.strftime('%Y-%m-%d')
-        else:
-            return json.JSONEncoder.default(self, obj)
+
+
 
 
 class DateEncoding(json.JSONEncoder):
