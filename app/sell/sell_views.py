@@ -22,8 +22,10 @@ def add_seller(request):
 
 def inquiry_seller(request):
     if request.method == "GET":
-        seller_id = request.GET.get("SellerID")
-        temp = models.SellerRegistry.objects.filter(SellerID=seller_id)
+        seller_id = request.GET.get("ConsumerId")
+        temp = models.SellerRegistry.objects.filter(ConsumerId=seller_id)
+        # seller_id = request.GET.get("SellerID")
+        # temp = models.SellerRegistry.objects.filter(SellerID=seller_id)
         ret = []
         if (temp):
             for sample in temp:
@@ -31,6 +33,8 @@ def inquiry_seller(request):
                 i = model_to_dict(sample)
                 # i.pop("Password")
                 i.pop("id")
+                i.pop("imgID")
+                i.pop("imgwork")
                 ret.append(json.dumps(i,cls=models.DateEncoder))
             return HttpResponse(ret, content_type="application/json")
         else:
@@ -40,14 +44,24 @@ def inquiry_seller(request):
 def alter_seller(request):
     if request.method == "POST":
         alter = json.loads(request.body)
-        seller_id = alter.get("SellerID")
-        temp = models.SellerRegistry.objects.get(SellerID=seller_id)
-        temp.IDNo = alter.get("IDNo")
+        # seller_id = alter.get("SellerID")
+        seller_id = alter.get("ConsumerId")
+        temp = models.SellerRegistry.objects.get(ConsumerId=seller_id)
+        temp.ConsumerId = alter.get("ConsumerId")
+        temp.ConsumerName = alter.get("ConsumerName")
         temp.ContactNo = alter.get("ContactNo")
+        temp.RegisterTimeConsumer = alter.get("RegisterTimeConsumer")
+        temp.SearchCounts = alter.get("SearchCounts")
+        temp.VIP = alter.get("VIP")
+        temp.Password = alter.get("Password")
+
+        temp.CharacterFlag = alter.get("CharacterFlag")
+        # temp.ContactNo = alter.get("ContactNo")
+        temp.IDNo = alter.get("IDNo")
         temp.RegisterTime = alter.get("RegisterTime")
         temp.WorkPlaceID = alter.get("WorkPlaceID")
         temp.PhotoSrc = alter.get("PhotoSrc")
-        temp.Password = alter.get("Password")
+        temp.companyregistry = alter.get("companyregistry")
         temp.save()
         print("测试：已修改销售人员信息")
     return HttpResponse("测试：已修改销售人员信息")
@@ -169,9 +183,11 @@ def register_commodity(request):
 
 def sell_state(request):
     if request.method == "GET":
-        sell_id = request.GET.get("SellID")
+        # sell_id = request.GET.get("SellID")
+        goods_name = request.GET.get("GoodsName")
+        temp = models.SellData.objects.filter(GoodsName__contains=goods_name)
         # temp = models.SellData.objects.get(SellID=sell_id)
-        temp = models.SellData.objects.filter(SellID=sell_id)
+        # temp = models.SellData.objects.filter(SellID=sell_id)
         ret = []
         if (temp):
             for sample in temp:

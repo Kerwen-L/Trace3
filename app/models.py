@@ -9,6 +9,17 @@ import json
 
 
 class Uni_Manager(models.Manager):
+    def update(self,registry,company,**kwargs):
+        com = CompanyRegistry.objects.filter(CompanyName=company)
+        if com.count() == 0:  # 公司表里没有这个公司
+            return 0
+        else:
+            comid = com.first().id
+            aaa = registry(**kwargs,companyregistry_id=comid)
+            aaa.save()
+            return aaa
+
+
     def create(self,company,**kwargs):
         #kwargs.update(classroom_ptr_id=temp.id,c_id=temp.c_id,c_number=temp.c_number)
         # if company==-1:#表示是销售员的个人信息完善
@@ -43,7 +54,7 @@ class ConsumerRegistry(models.Model):
     ConsumerId = models.CharField(max_length=10,unique=True)            # 消费者注册ID
     ConsumerName = models.CharField(max_length=10)                      # 姓名
     ContactNo = models.CharField(max_length=11)                         # 联系方式
-    RegisterTimeConsumer = models.DateField(default=date.today())       # 消费者注册时间
+    RegisterTimeConsumer = models.DateField(default=date.today)       # 消费者注册时间
     SearchCounts = models.IntegerField(default=0)                       # 查询次数
     VIP = models.BooleanField(default=False)                            # 会员标志位
     Password = models.CharField(max_length=30)                          # 登陆密码
@@ -143,14 +154,19 @@ class TransporterRegistry(ConsumerRegistry):
     TransportCounts=models.IntegerField(default=0)
     Flag = models.IntegerField(default=0)
     #Password=models.CharField(max_length=30)
-    imgID = models.ImageField(upload_to='images/', default="")
-    imgwork = models.ImageField(upload_to='images/', default="")
-    imgquality = models.ImageField(upload_to='images/', default="")
-    companyregistry = models.ForeignKey("CompanyRegistry", on_delete=models.CASCADE,
-                                        related_name="transporter",null=True)  # 一个农场有好多生产者
+    #imgID = models.ImageField(upload_to='images/', default="")
+    #imgwork = models.ImageField(upload_to='images/', default="")
+    #imgquality = models.ImageField(upload_to='images/', default="")
+    #companyregistry = models.ForeignKey("CompanyRegistry", on_delete=models.CASCADE,
+                                        #related_name="transporter",null=True)  # 一个农场有好多生产者
     inherit = Uni_Manager()
     def __str__(self):  # print的时候好看，类似于C++的重载<<
             return self.ConsumerId
+
+    def to_front(self):
+        listtemp = [f.name for f in self._meta.fields]
+        listtemp.remove('consumerregistry_ptr')
+        return json.dumps(dict([(attr, getattr(self, attr)) for attr in listtemp]), cls=DateEncoder)
 
     # model的内部写一个函数返回json
     def toJSON(self):
@@ -189,14 +205,14 @@ class QuarantineRegistry(ConsumerRegistry):
 class ProcessorRegistry(ConsumerRegistry):
     #ProcessorId = models.CharField(max_length=30)                                #加工员注册ID
     #ProcessorName = models.CharField(max_length=10)                       #姓名
-    IDNo = models.BigIntegerField()                                       #身份证号
+    IDNo = models.CharField(max_length=18)                                 #身份证号
     #ContactNo = models.BigIntegerField()                                  #联系方式
     RegisterTime = models.DateField(default=date.today)                   #注册时间
-    WorkPlaceID = models.CharField(max_length=50)                         #工作单位ID
+    WorkPlaceID = models.CharField(max_length=50, null=True)                         #工作单位ID
     PhotoSrc = models.CharField(max_length=50,null=True,blank=True)       #加工人员证件照地址
-    HC4foodCertificationNo = models.BigIntegerField()                     #食品从业人员健康证明编号
-    HC4foodCertificationSrc = models.CharField(max_length=50)             #食品从业人员健康证明图片地址
-    ProcessorCounts = models.IntegerField(default=0)                      #加工操作次数
+    HC4foodCertificationNo = models.BigIntegerField(null=True)                     #食品从业人员健康证明编号
+    HC4foodCertificationSrc = models.CharField(max_length=50,null=True)             #食品从业人员健康证明图片地址
+    ProcessorCounts = models.IntegerField(default=0,null=True)                      #加工操作次数
     #Password = models.CharField(max_length=30)
     imgID = models.ImageField(upload_to='images/', default="")
     imgwork = models.ImageField(upload_to='images/', default="")
@@ -218,15 +234,15 @@ class SellerRegistry(ConsumerRegistry):
     # SellerName = models.CharField(max_length=10)  # 姓名
     # SellerName = ConsumerRegistry.ConsumerName
     # IDNo = models.BigIntegerField()                         #身份证号
-    IDNo = models.CharField(max_length=18)  # 身份证号
+    IDNo = models.CharField(max_length=18)                          # 身份证号
     # ContactNo = models.BigIntegerField()                    #联系方式
     # RegisterTime = models.DateTimeField()  # 销售人员注册时间
-    RegisterTime = models.DateTimeField(default=timezone.now)  # 销售人员注册时间
-    WorkPlaceID = models.CharField(max_length=50)  # 工作单位ID(企业注册ID)
-    PhotoSrc = models.CharField(max_length=100)  # 销售人员证件照地址
+    RegisterTime = models.DateField(default=date.today)             # 销售人员注册时间
+    WorkPlaceID = models.CharField(max_length=50)                   # 工作单位ID(企业注册ID)
+    PhotoSrc = models.CharField(max_length=100)                     # 销售人员证件照地址
     # Password = models.CharField(max_length=30)              #登陆密码(需加密保存)
     imgID = models.ImageField(upload_to='images/', default="")
-    imgwork = models.ImageField(upload_to='images/', default="")  # 销售员没有工作单位
+    imgwork = models.ImageField(upload_to='images/', default="")    # 销售员没有工作单位
     companyregistry = models.ForeignKey("CompanyRegistry", on_delete=models.CASCADE,
                                         related_name="seller", null=True)  # 一个农场有好多生产者
     inherit = Uni_Manager()
@@ -291,7 +307,7 @@ class QuarantineData(models.Model):
 class ProcessData(models.Model):
     ProcessID = models.CharField(max_length=22,unique=True, null=True, blank=True)   #加工编号(屠宰点编号7+生产内容ID10+屠宰点宰杀顺序)
     ProductionID = models.CharField(max_length=10)                 #生成内容ID 羊ID+00(8+2)
-    ProcessPersonID = models.CharField(max_length=10)              #加工人员ID 继承与消费者ID
+    ConsumerId = models.CharField(max_length=10)              #加工人员ID 继承与消费者ID
 #    ProcessPersonID = models.ForeignKey('ProcessorRegistry',on_delete=models.CASCADE,)
     ProcessLocation = models.CharField(max_length=7)               #加工地 (企业编号7)
     ProcessTime = models.DateField(default=date.today)             #加工时间
@@ -306,7 +322,7 @@ class ProcessData(models.Model):
         return self.ProcessID
     # model的内部写一个函数返回json
     def toJSON(self):
-       return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]),cls=DateEncoder)
+        return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]),cls=DateEncoder)
 
 
 # 运输数据表
@@ -318,8 +334,8 @@ class TransportData(models.Model):
     From=models.CharField(max_length=50)
     To=models.CharField(max_length=50)
     Flag=models.IntegerField(default=0)                               #环节标志
-    TransactionStartTime=models.DateField(default=date.today)         #流通开始时间
-    TransactionEndTime=models.DateField(default=date.today)
+    TransactionStartTime=models.DateTimeField(default=date.today)         #流通开始时间
+    TransactionEndTime=models.DateTimeField(default=date.today)
     TransactionStartUCLLink=models.CharField(max_length=50)           #起点UCL索引
     TransactionEndUCLLink=models.CharField(max_length=50)
     def __str__(self):
@@ -347,7 +363,7 @@ class SellData(models.Model):
     AccountabilityFlag = models.IntegerField(default=0)  # 追责标志位
     SellUCLLink = models.CharField(max_length=100,null=True,blank=True)  # 销售UCL索引
     GoodsName = models.CharField(max_length=50,null=True,blank=True)      #商品名称
-    ConsumerID = models.CharField(max_length=10,unique=True,null=True,blank=True)   # 销售员ID
+    ConsumerID = models.CharField(max_length=10,null=True,blank=True)   # 销售员ID
 
 
 '''
@@ -377,7 +393,14 @@ class DateEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
 
-
+class ComplexEncoder(json.JSONEncoder):                  #时间解析函数
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(obj, date):
+            return obj.strftime('%Y-%m-%d')
+        else:
+            return json.JSONEncoder.default(self, obj)
 
 
 
