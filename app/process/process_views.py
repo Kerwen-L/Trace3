@@ -111,8 +111,8 @@ def ProcessData_Add(request):
             temp1.ProcessorCounts = temp1.ProcessorCounts + 1 #对应的加工人员的加工次数+1
             temp1.save()
 
-            img = qrcode.make('{ProductionId:132}')
-            img.save('test1.png')
+            img = qrcode.make('{ProductionId:'+person+'}')
+            img.save('test'+person+'.png')
 
             print("加工数据添加成功")
             return HttpResponse("加工数据上传数据库成功!")

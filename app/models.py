@@ -373,7 +373,7 @@ class SellData(models.Model):
     # SellID = models.BigIntegerField()                       #销售编号(销售点编号+销售/生产内容编号+销售点顺序号)
     SellID = models.CharField(max_length=30,unique=True,null=True,blank=True)  # 销售编号(销售点编号+销售/生产内容编号+销售点顺序号)
     # ProductionID = models.BigIntegerField()                 #生产内容ID/生产内容再加工ID(销售内容ID)
-    # ProductionID = models.CharField(max_length=16,null=True,blank=True)  # 生产内容ID/生产内容再加工ID(销售内容ID)
+    ProductionID = models.CharField(max_length=16,null=True,blank=True)  # 生产内容ID/生产内容再加工ID(销售内容ID)
     # SellLocation = models.CharField(max_length=50,null=True,blank=True)  # 销售地
     SPReceiveTime = models.DateTimeField()  # 销售点接收时间
     SPSelloutTime = models.DateTimeField(null=True,blank=True)  # 销售点售出时间(为空则未销售)
