@@ -327,48 +327,106 @@ def update(request):
 def origin(request):
     if request.method == "GET":
         production_id = request.GET.get("ProductionID")  # 获得加工人员的processor_idTrace2@223.3.79.211
-        print(production_id)
-#        return HttpResponse("数据查询开始")
+        print("production_id is %s" % (production_id))
+
+        #预处理
+        sheep_id_0 = production_id[0:8]
+        print("前8位是 %s" % (sheep_id_0))
+        id = ['00000000','000000','0000','00']
+        print(id[0])
+        print(id[1])
+        print(id[2])
+        print(id[3])
+
+        sheep_id = sheep_id_0+''+id[0]
+        print("sheep_id is %s" % (sheep_id))
+
+        isheep_id = production_id[8:17]
+        print(isheep_id)
+
+        print("数据查询开始")
+
         try:
             ret = []
             #生产表的查询
 
-            #加工表数据查询
-            temp1 = models.ProcessData.objects.filter(ProductionID=production_id)
-            if (temp1):
-                for sample1 in temp1:
-                    i = model_to_dict(sample1)
-                    i.pop("id")
-                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
-            else:
-                print("加工表没有数据")
-            #检疫表的溯源 出栏检疫
-            temp2=models.QuarantineData.objects.filter(ProductionId=production_id)
+            # 运输表的查询 00 一次 运输到检疫
+            temp2 = models.TransportData.objects.filter(ProductionID=sheep_id, Transport_Flag=30)
             if (temp2):
                 for sample2 in temp2:
                     i = model_to_dict(sample2)
                     i.pop("id")
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+                    print("运输表1 有数据")
             else:
-                print("检疫表没有数据")
-            #运输表的查询 生产-检疫
-            temp3 = models.TransportData.objects.filter(ProductionID=production_id)
+                print("运输表1没有数据")
+
+
+            # 检疫表的溯源 00 一次 羊id
+            temp3 = models.QuarantineData.objects.filter(ProductionId=sheep_id)
             if (temp3):
                 for sample3 in temp3:
                     i = model_to_dict(sample3)
                     i.pop("id")
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+                print("检疫表 有数据")
             else:
-                print("运输表没有数据")
-            #销售表溯源
-            temp4 = models.QuarantineData.objects.filter(ProductionId=production_id)
+                print("检疫表没有数据")
+
+            #检疫到加工 00 一次 羊id
+            temp4 = models.TransportData.objects.filter(ProductionID=sheep_id, Transport_Flag=31)
             if (temp4):
                 for sample4 in temp4:
                     i = model_to_dict(sample4)
                     i.pop("id")
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+                    print("运输表2 有数据")
+            else:
+                print("运输表2没有数据")
+
+            #加工表数据查询 模糊查询 8位
+            temp5 = models.ProcessData.objects.get(ReproductionID=production_id)
+            if(temp5):
+                n = temp5.Step
+                print("n: %s" % (n))
+                if(n==4):
+                    tempp=models.ProcessData.objects.get(ReproductionID=production_id)
+                    i = model_to_dict(tempp)
+                    i.pop("id")
+                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+                for n in [3, 2, 1]:
+                    i = 8+2*n
+                    serch_id = production_id[0:i]+''+id[n]
+                    print(serch_id)
+                    tempp = models.ProcessData.objects.get(ReproductionID=serch_id)
+                    i = model_to_dict(tempp)
+                    i.pop("id")
+                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+                print("加工表 有数据")
+            else:
+                print("加工表没有数据")
+
+            #运输表 加工到销售 XX 一次
+            temp6 = models.TransportData.objects.filter(ProductionID=production_id, Transport_Flag=32)
+            if (temp6):
+                for sample6 in temp6:
+                    i = model_to_dict(sample6)
+                    i.pop("id")
+                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+                print("运输表3 有数据")
+            else:
+                print("运输表3没有数据")
+
+            #销售表溯源 XX 一次
+            temp7 = models.SellData.objects.filter(ProductionID=production_id)
+            if (temp7):
+                for sample7 in temp7:
+                    i = model_to_dict(sample7)
+                    i.pop("id")
+                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
             else:
                 print("销售表没有数据")
+
             return HttpResponse(ret, content_type="application/json", charset="utf-8")
         except ObjectDoesNotExist:
             return HttpResponse("数据查询失败")
