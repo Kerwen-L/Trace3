@@ -455,10 +455,6 @@ class DateEncoding(json.JSONEncoder):
             return o.strftime('%Y/%m/%d')
 
 
-class UUID_Sheep(models.Model):
-    UUID = models.CharField(max_length=50, null=True)
-    RecordID = models.CharField(max_length=25, null=True)
-    PB_Flag = models.IntegerField(default=0, null=True)
 
 
 
