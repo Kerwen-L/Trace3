@@ -7,6 +7,8 @@ from django.template import Context
 #from django.utils import simplejson
 import json
 
+from app.ucl import ucl
+
 from django.forms.models import model_to_dict
 
 from datetime import datetime
@@ -176,6 +178,19 @@ def complete_supermarket(request):
 
 def register_commodity(request):
     if request.method == "POST":
+        '''
+        data = json.loads(request.body)
+        print(data)
+        uclstr = data['ucl']
+        flag = data['flag']
+        serialnumber = data['serialnumber']
+        productionId = data['productionId']
+        print("uclStrBase64:" + uclstr)
+        [contentdict, uclpath] = ucl.unpack(uclstr, flag, productionId, serialnumber)
+        print(contentdict)
+        print(uclpath)
+        models.SellData(**contentdict).save()
+        '''
         models.SellData(**json.loads(request.body)).save()
         print("测试：已录入商品信息")
     return HttpResponse("测试：已录入商品信息")
@@ -195,7 +210,7 @@ def sell_state(request):
                 i = model_to_dict(sample)
                 i.pop("id")
                 ret.append(json.dumps(i,cls=models.DateEncoder))
-                print("测试：查询商品信息")
+            print("测试：查询商品信息")
             return HttpResponse(ret, content_type="application/json")
         else:
             return HttpResponse("测试：未查询到商品信息")

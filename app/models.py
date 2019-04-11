@@ -124,7 +124,9 @@ class ProducerRegistry(ConsumerRegistry):
     ProductionKind=models.IntegerField(default=0,null=True)
     ProductionScale=models.CharField(max_length=100,null=True)#这里存json
     InvestigateRes=models.IntegerField(default=0,null=True)
-    SecretKeys=models.CharField(max_length=100,null=True)#这里存json
+    # SecretKeys=models.CharField(max_length=100,null=True)#这里存json
+    PricateKey = models.CharField(max_length=1024, null=True)   # 私钥
+    PublicKey = models.CharField(max_length=1024,null=True)     # 公钥
     #Password=models.CharField(max_length=30)
     CompanyName=models.CharField(max_length=15,null=True)
     imgID=models.ImageField(upload_to='images/',default="")
@@ -155,6 +157,8 @@ class TransporterRegistry(ConsumerRegistry):
     TransportCounts=models.IntegerField(default=0)
     Flag = models.IntegerField(default=0)
     #Password=models.CharField(max_length=30)
+    PricateKey = models.CharField(max_length=1024, null=True)  # 私钥
+    PublicKey = models.CharField(max_length=1024, null=True)  # 公钥
     imgID = models.ImageField(upload_to='images/', default="")
     imgwork = models.ImageField(upload_to='images/', default="")
     imgquality = models.ImageField(upload_to='images/', default="")
@@ -197,6 +201,8 @@ class QuarantineRegistry(ConsumerRegistry):
     LicensedVeterinaryQCNo = models.CharField(max_length=32, null=True, blank=True)
     LicensedVeterinaryQCSrc = models.CharField(max_length=32, null=True, blank=True)
     QuarantineCounts = models.IntegerField(default=0)
+    PricateKey = models.CharField(max_length=1024, null=True)  # 私钥
+    PublicKey = models.CharField(max_length=1024, null=True)  # 公钥
     imgID = models.ImageField(upload_to='images/', default="")
     imgwork = models.ImageField(upload_to='images/', default="")
     imgquality1 = models.ImageField(upload_to='images/', default="")
@@ -223,6 +229,8 @@ class ProcessorRegistry(ConsumerRegistry):
     HC4foodCertificationSrc = models.CharField(max_length=50,null=True)             #食品从业人员健康证明图片地址
     ProcessorCounts = models.IntegerField(default=0,null=True)                      #加工操作次数
     #Password = models.CharField(max_length=30)
+    PricateKey = models.CharField(max_length=1024, null=True)  # 私钥
+    PublicKey = models.CharField(max_length=1024, null=True)  # 公钥
     imgID = models.ImageField(upload_to='images/', default="")
     imgwork = models.ImageField(upload_to='images/', default="")
     imgquality = models.ImageField(upload_to='images/', default="")
@@ -250,6 +258,8 @@ class SellerRegistry(ConsumerRegistry):
     WorkPlaceID = models.CharField(max_length=50)                   # 工作单位ID(企业注册ID)
     PhotoSrc = models.CharField(max_length=100)                     # 销售人员证件照地址
     # Password = models.CharField(max_length=30)              #登陆密码(需加密保存)
+    PricateKey = models.CharField(max_length=1024, null=True)  # 私钥
+    PublicKey = models.CharField(max_length=1024, null=True)  # 公钥
     imgID = models.ImageField(upload_to='images/', default="")
     imgwork = models.ImageField(upload_to='images/', default="")    # 销售员没有工作单位
     companyregistry = models.ForeignKey("CompanyRegistry", on_delete=models.CASCADE,
@@ -373,7 +383,7 @@ class TransportData(models.Model):
     TransactionPersonID=models.CharField(max_length=50,default='')    #运输人员ID(与信息表中的id建立关联)
     From=models.CharField(max_length=50)
     To=models.CharField(max_length=50)
-    Flag=models.IntegerField(default=2)                               #环节标志
+    State=models.IntegerField(default=0)                               #环节标志
     # TransactionStartTime=models.DateTimeField(default=date.today)         #流通开始时间
     # TransactionEndTime=models.DateTimeField(default=date.today)
     TransactionStartTime = models.DateTimeField(default=timezone.now)  # 流通开始时间
@@ -381,6 +391,7 @@ class TransportData(models.Model):
     TransactionStartUCLLink=models.CharField(max_length=50)           #起点UCL索引
     TransactionEndUCLLink=models.CharField(max_length=50)
     Transport_Flag = models.IntegerField(default=0)
+    Flag = models.IntegerField(default=2)
     def __str__(self):
         return self.TransactionID
 
