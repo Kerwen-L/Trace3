@@ -163,12 +163,12 @@ class TransporterRegistry(ConsumerRegistry):
     inherit = Uni_Manager()
     def __str__(self):  # print的时候好看，类似于C++的重载<<
             return self.ConsumerId
-'''
-    def to_front(self):
-        listtemp = [f.name for f in self._meta.fields]
-        listtemp.remove('consumerregistry_ptr')
-        return json.dumps(dict([(attr, getattr(self, attr)) for attr in listtemp]), cls=DateEncoder)
-'''
+
+    # def to_front(self):
+    #   listtemp = [f.name for f in self._meta.fields]
+    #   listtemp.remove('consumerregistry_ptr')
+    #    return json.dumps(dict([(attr, getattr(self, attr)) for attr in listtemp]), cls=DateEncoder)
+
     # model的内部写一个函数返回json
     def toJSON(self):
             return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]))
@@ -277,7 +277,7 @@ class ProductionData(models.Model):
     UCLLink=models.CharField(max_length=50)
 
     # MonitorRecordTime=models.TimeField()#timestamp()
-    MonitorRecordTime = models.DateTimeField(default=timezone.now())
+    # MonitorRecordTime = models.DateTimeField(default=timezone.now())
     Flag = models.IntegerField(default=0)
 
     MonitorRecordTime=models.DateTimeField(default=timezone.now, null=True)
