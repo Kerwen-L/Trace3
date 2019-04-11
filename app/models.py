@@ -373,7 +373,7 @@ class TransportData(models.Model):
     TransactionPersonID=models.CharField(max_length=50,default='')    #运输人员ID(与信息表中的id建立关联)
     From=models.CharField(max_length=50)
     To=models.CharField(max_length=50)
-    Flag=models.IntegerField(default=2)                               #环节标志
+    State=models.IntegerField(default=0)                               #环节标志
     # TransactionStartTime=models.DateTimeField(default=date.today)         #流通开始时间
     # TransactionEndTime=models.DateTimeField(default=date.today)
     TransactionStartTime = models.DateTimeField(default=timezone.now)  # 流通开始时间
@@ -381,6 +381,7 @@ class TransportData(models.Model):
     TransactionStartUCLLink=models.CharField(max_length=50)           #起点UCL索引
     TransactionEndUCLLink=models.CharField(max_length=50)
     Transport_Flag = models.IntegerField(default=0)
+    Flag = models.IntegerField(default=2)
     def __str__(self):
         return self.TransactionID
 
