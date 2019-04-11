@@ -120,7 +120,7 @@ def sheep_state(request):
     for obj in base_data:
         HealthState = int(random.choice("01"))
         GPSLocation = "朔州"
-        ActiveDis = round(random.uniform(20, 80), 3)  #精度为3位
+        ActiveDis = round(random.uniform(20, 80), 3)  # 精度为3位
         Weight = round(random.uniform(40, 70), 3)
         BodyTemperature = round(random.uniform(20, 30), 3)
         models.ProductionData.objects.create(RecordID=RecordID, MonitorId=UUID, GPSLocation=GPSLocation,

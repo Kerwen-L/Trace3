@@ -66,6 +66,25 @@ def register(request):
     return HttpResponse("注册成功！")
 '''
 
+def key():
+    pk = PKey()
+
+    pk.generate_key(TYPE_RSA, 512)
+
+    pri_key = dump_privatekey(FILETYPE_PEM, pk)  # 生成私钥
+    pri_key = pri_key[28:-27]
+    pri_key = pri_key.decode()
+    print("未64前", pri_key)
+
+    # byte_base64 = base64.b64encode(pri_key)
+    # pri_key_base64 = str(byte_base64, 'utf-8')
+
+    pub_key = dump_publickey(FILETYPE_PEM, pk)  # 生成公钥
+    pub_key = pub_key[28:-27]
+    dic = {}
+    dic["PrivateKey"] = pri_key
+    dic["PublicKey"] = pub_key.decode()
+    return dic
 
 def DateEncoder(obj):
     if isinstance(obj, (datetime.datetime, datetime.date)):
@@ -164,23 +183,24 @@ def fulfil(request):  # 个人信息完善函数,这个函数也要返回完善�
     ConsumerId = dicttemp["ConsumerId"]
     dicttemp.pop("ConsumerId")  # 把ConsumerId这个键值对删掉，免得后面重复
     temp = models.ConsumerRegistry.objects.get(ConsumerId=ConsumerId)  # 在消费者表里找到该表项，该人
-    #print(temp.__dict__)
-
+    # print(temp.__dict__)
 
     CompanyName = dicttemp["CompanyName"]
     dicttemp.pop("CompanyName")  # 后面注册的时候公司名称是要去掉的
 
     dic = temp.__dict__
     dic.pop("_state")
-    #dic.pop("id")
+    # dic.pop("id")
     dicttemp.update(dic)
+    dic2 = key()
+    dicttemp.update(dic2)
     # for key, value in dicttemp.items():
     #     print(key, value)
     # for key,value in temp.__dict__.items():
     #     print(key,value)
 
     def producer():
-        aaa = models.ProducerRegistry.inherit.update(models.ProducerRegistry,CompanyName,**dicttemp)
+        aaa = models.ProducerRegistry.inherit.update(models.ProducerRegistry, CompanyName, **dicttemp)
         if aaa == 0:
             return 0
         else:
@@ -474,68 +494,20 @@ def origin(request):
         return HttpResponse("method 应该为GET")
 
 
-def qrcode(request):
-    import qrcode
-    img = qrcode.make('{name:123}')
-    img.save('test.png')
-
-
-def key(request):
-    pk = PKey()
-
-    pk.generate_key(TYPE_RSA, 512)
-
-    pri_key = dump_privatekey(FILETYPE_PEM, pk)  # 生成私钥
-
-    pub_key = dump_publickey(FILETYPE_PEM, pk)  # 生成公钥
-
-    dic = {}
-    dic["pri_key"] = pri_key.decode()
-    dic["pub_key"] = pub_key.decode()
-    print(type(pri_key))
-    print(dic)
-    return HttpResponse(json.dumps(dic, ensure_ascii=False), content_type="application/json")  # 返回公私钥
-
 def test(request):
-    pk = PKey()
+    a = models.ConsumerRegistry.objects.first()
+    print(a.producerregistry.IDNo)
+    return HttpResponse("test ing")
 
-    pk.generate_key(TYPE_RSA, 512)
 
-    pri_key = dump_privatekey(FILETYPE_PEM, pk)  # 生成私钥
-    pri_key = pri_key[28:-27]
-    pri_key = pri_key.decode()
-    print("未64前", pri_key)
-
-    # byte_base64 = base64.b64encode(pri_key)
-    # pri_key_base64 = str(byte_base64, 'utf-8')
-
-    pub_key = dump_publickey(FILETYPE_PEM, pk)  # 生成公钥
-    pub_key = pub_key[28:-27]
-    dic = {}
-    dic["pri_key"] = pri_key
-    dic["pub_key"] = pub_key.decode()
-    return HttpResponse(json.dumps(dic, ensure_ascii=False), content_type="application/json")  # 返回公私钥
-    # return HttpResponse(pri_key)
 
 def seceret(request):
-    pk = PKey()
-
-    pk.generate_key(TYPE_RSA, 512)
-
-    pri_key = dump_privatekey(FILETYPE_PEM, pk)  # 生成私钥
-    pri_key = pri_key[28:-27]
-    pri_key = pri_key.decode()
-    print("未64前", pri_key)
-
-    # byte_base64 = base64.b64encode(pri_key)
-    # pri_key_base64 = str(byte_base64, 'utf-8')
-
-    pub_key = dump_publickey(FILETYPE_PEM, pk)  # 生成公钥
-    pub_key = pub_key[28:-27]
-    dic = {}
-    dic["pri_key"] = pri_key
-    dic["pub_key"] = pub_key.decode()
-    return HttpResponse(json.dumps(dic, ensure_ascii=False), content_type="application/json")  # 返回公私钥
+    # dic = json.loads(request.body.decode())
+    # ConsumerId = dic["ConsumerId"]
+    # Flag = dic["Flag"]  # 生，检，加，运，销 分别为 1,2,3,4,5
+    a = models.ConsumerRegistry.objects.first()
+    print(a.producerregistry.IDNo)
+    return HttpResponse("test ing")
 
 
 
