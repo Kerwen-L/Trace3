@@ -313,10 +313,10 @@ def update(request):
     if request.method=="POST":
         try:
             co = json.loads(request.body)  #获得json
-            co_id=co.get("ConsumerId")  #获得id
-            temp2 =models.ConsumerRegistry.objects.get(ConsumerId=co_id) #获得对象
+            co_id = co.get("ConsumerId")  #获得id
+            temp2 = models.ConsumerRegistry.objects.get(ConsumerId=co_id) #获得对象
             temp2.Password = co.get("Password")
-            temp2.ContactNo=co.get("ContactNo")
+            temp2.ContactNo = co.get("ContactNo")
             temp2.save()
             print("密码修改成功")
             return HttpResponse("密码更改成功")
@@ -327,22 +327,22 @@ def update(request):
 def origin(request):
     if request.method == "GET":
         production_id = request.GET.get("ProductionID")  # 获得加工人员的processor_idTrace2@223.3.79.211
-        print("production_id is %s" % (production_id))
+#        print("production_id is %s" % (production_id))
 
         #预处理
         sheep_id_0 = production_id[0:8]
-        print("前8位是 %s" % (sheep_id_0))
-        id = ['00000000','000000','0000','00']
-        print(id[0])
-        print(id[1])
-        print(id[2])
-        print(id[3])
+#        print("前8位是 %s" % (sheep_id_0))
+        id = ['00000000', '000000', '0000', '00']
+#        print(id[0])
+#        print(id[1])
+#        print(id[2])
+#        print(id[3])
 
         sheep_id = sheep_id_0+''+id[0]
-        print("sheep_id is %s" % (sheep_id))
+#        print("sheep_id is %s" % (sheep_id))
 
         isheep_id = production_id[8:17]
-        print(isheep_id)
+#        print(isheep_id)
 
         print("数据查询开始")
 
@@ -350,19 +350,27 @@ def origin(request):
             ret = []
             #生产表的查询
 
-            # 运输表的查询 00 一次 运输到检疫
+            # 运输表的查询
             temp2 = models.TransportData.objects.filter(ProductionID=sheep_id, Transport_Flag=30)
             if (temp2):
                 for sample2 in temp2:
+#                    p_ID = sample2.TransactionPersonID
+#                    print("p_ID is %s" % ( p_ID ))
+                    temp_person = models.TransporterRegistry.objects.get(IDNo=sample2.TransactionPersonID)
+#                    print("id %s" % (temp_person.ConsumerName))
+#                    print(temp_person.ConsumerName)
                     i = model_to_dict(sample2)
                     i.pop("id")
+                    i.update({'TransactionPersonID': temp_person.ConsumerName}) #修改
+#                    i.update({'b': 2}) #更改
+#                    i["TransactionPersonID"]=temp_person.
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
                     print("运输表1 有数据")
             else:
                 print("运输表1没有数据")
 
 
-            # 检疫表的溯源 00 一次 羊id
+            # 检疫表的查询
             temp3 = models.QuarantineData.objects.filter(ProductionId=sheep_id)
             if (temp3):
                 for sample3 in temp3:
@@ -373,57 +381,76 @@ def origin(request):
             else:
                 print("检疫表没有数据")
 
-            #检疫到加工 00 一次 羊id
+            #检疫到加工
             temp4 = models.TransportData.objects.filter(ProductionID=sheep_id, Transport_Flag=31)
             if (temp4):
                 for sample4 in temp4:
+                    temp_person = models.TransporterRegistry.objects.get(IDNo=sample4.TransactionPersonID)
                     i = model_to_dict(sample4)
                     i.pop("id")
+                    i.update({'TransactionPersonID': temp_person.ConsumerName})  # 修改
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
                     print("运输表2 有数据")
             else:
                 print("运输表2没有数据")
 
-            #加工表数据查询 模糊查询 8位
+            #加工表数据查询
             temp5 = models.ProcessData.objects.get(ReproductionID=production_id)
             if(temp5):
                 n = temp5.Step
-                print("n: %s" % (n))
+#                print("n: %s" % (n))
                 if(n==4):
-                    tempp=models.ProcessData.objects.get(ReproductionID=production_id)
+#                    print(production_id)
+                    tempp = models.ProcessData.objects.get(ReproductionID=production_id)
+#                    print("ProcessID is %s"%(tempp.ProcessID))
+#                    print("ConsumerID is %s"%(tempp.ConsumerId))
+                    temp_person = models.ProcessorRegistry.objects.get(id=tempp.ConsumerId)
+#                    print(temp_person.ConsumerName)
+#                    print("...........")
                     i = model_to_dict(tempp)
                     i.pop("id")
+                    i.update({'ConsumerId': temp_person.ConsumerName})  # 修改
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
                 for n in [3, 2, 1]:
                     i = 8+2*n
                     serch_id = production_id[0:i]+''+id[n]
-                    print(serch_id)
-                    tempp = models.ProcessData.objects.get(ReproductionID=serch_id)
-                    i = model_to_dict(tempp)
+#                    print(serch_id)
+                    tempp1 = models.ProcessData.objects.get(ReproductionID=serch_id)
+#                    print("ProcessID is %s" % (tempp1.ProcessID))
+#                    print("ConsumerID is %s" % (tempp1.ConsumerId))
+                    temp_person1 = models.ProcessorRegistry.objects.get(id=tempp1.ConsumerId)
+#                    print("ConsumerID is %s" % (temp_person1.id))
+#                    print(temp_person1.ConsumerName)
+#                    print("...........")
+                    i = model_to_dict(tempp1)
                     i.pop("id")
+                    i.update({'ConsumerId': temp_person1.ConsumerName})  # 修改
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
                 print("加工表 有数据")
             else:
                 print("加工表没有数据")
 
-            #运输表 加工到销售 XX 一次
+            #运输表 加工到销售
             temp6 = models.TransportData.objects.filter(ProductionID=production_id, Transport_Flag=32)
             if (temp6):
                 for sample6 in temp6:
+                    temp_person = models.TransporterRegistry.objects.get(IDNo=sample6.TransactionPersonID)
                     i = model_to_dict(sample6)
                     i.pop("id")
+                    i.update({'TransactionPersonID': temp_person.ConsumerName})  # 修改
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
                 print("运输表3 有数据")
             else:
                 print("运输表3没有数据")
 
-            #销售表溯源 XX 一次
+            #销售表溯源
             temp7 = models.SellData.objects.filter(ProductionID=production_id)
             if (temp7):
                 for sample7 in temp7:
                     i = model_to_dict(sample7)
                     i.pop("id")
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+                print("销售表有 数据")
             else:
                 print("销售表没有数据")
 
