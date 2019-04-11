@@ -129,6 +129,9 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')     # 设置静态文件路径为主目录下的media文件夹
 
+QRCODE_ORIGIN_URL = '/qrcode_origin/'
+QRCODE_ORIGIN_ROOT = os.path.join(BASE_DIR, 'qrcode_origin')     # 设置静态文件路径为主目录下的media文件夹
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 QRCODE_PROCESS_URL = '/qrcode_process/'
 QRCODE_PROCESS_ROOT = os.path.join(BASE_DIR, 'qrcode_process')     # 设置静态文件路径为主目录下的media文件夹

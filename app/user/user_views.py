@@ -9,7 +9,9 @@ from django.template import Context
 from django.core import serializers
 import json
 import datetime
-
+from OpenSSL.crypto import PKey
+from OpenSSL.crypto import TYPE_RSA, FILETYPE_PEM
+from OpenSSL.crypto import dump_privatekey, dump_publickey
 # Create your views here.
 
 
@@ -181,7 +183,7 @@ def fulfil(request):  # 个人信息完善函数,这个函数也要返回完善�
         if aaa == 0:
             return 0
         else:
-            #aaa.CharacterFlag |= 0b100000  # 把第一位置1
+            aaa.CharacterFlag |= 0b100000  # 把第一位置1
             aaa.save()
 
 
@@ -488,6 +490,40 @@ def qrcode(request):
     import qrcode
     img = qrcode.make('{name:123}')
     img.save('test.png')
+
+
+def key(request):
+    pk = PKey()
+
+    pk.generate_key(TYPE_RSA, 512)
+
+    pri_key = dump_privatekey(FILETYPE_PEM, pk)  # 生成私钥
+
+    pub_key = dump_publickey(FILETYPE_PEM, pk)  # 生成公钥
+
+    dic = {}
+    dic["pri_key"] = pri_key.decode()
+    dic["pub_key"] = pub_key.decode()
+    print(type(pri_key))
+    print(dic)
+    return HttpResponse(json.dumps(dic, ensure_ascii=False), content_type="application/json")  # 返回公私钥
+
+def test(request):
+    pk = PKey()
+
+    pk.generate_key(TYPE_RSA, 512)
+
+    pri_key = dump_privatekey(FILETYPE_PEM, pk)  # 生成私钥
+
+    pub_key = dump_publickey(FILETYPE_PEM, pk)  # 生成公钥
+
+    dic = {}
+    dic["pri_key"] = pri_key.decode()
+    dic["pub_key"] = pub_key.decode()
+    print(type(pri_key))
+    print(dic)
+    return HttpResponse(json.dumps(dic, ensure_ascii=False), content_type="application/json")  # 返回公私钥
+    # return HttpResponse("测试ing")
 
 
 
