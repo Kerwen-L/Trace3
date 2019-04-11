@@ -1634,7 +1634,7 @@
     </column>
     <column id="399" parent="245" name="MonitorId">
       <Position>3</Position>
-      <DataType>varchar(25)|0s</DataType>
+      <DataType>varchar(50)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
@@ -1682,7 +1682,7 @@
     </column>
     <column id="407" parent="245" name="MonitorRecordTime">
       <Position>11</Position>
-      <DataType>time(6)|0s</DataType>
+      <DataType>datetime|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>

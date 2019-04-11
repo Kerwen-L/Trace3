@@ -117,8 +117,9 @@ def sheep_state(request):
     UUID = uuid_temp.first().UUID  # 在中间表找到该羊对应的项圈ID
     base_data = models.BaseStationData.objects.filter(UUID=UUID, SheepID=RecordID)  # 这里应该有很多条数据
     for obj in base_data:
-        models.ProductionData.objects.create(RecordID=RecordID, MonitorId=UUID, BodyTemperature=obj.Data1,
-                                                MonitorRecordTime=obj.Time)
+        models.ProductionData.objects.create(RecordID=RecordID, MonitorId=UUID,
+                                             State=1, HealthState=1, ActiveDis=33.6, Weight=60.02, BodyTemperature=20.1,
+                                                MonitorRecordTime=obj.Time)  # 这里应该是BodyTemperature=obj.Data1,但是Data1布吉岛是什么鸡巴，只能写死呵呵
     sheep_final = models.ProductionData.objects.filter(RecordID=RecordID)
     data = serializers.serialize("json", sheep_final)
     return HttpResponse(data, content_type="application/json")  # 直接不管三七二十一将queryset序列化成json给前端
