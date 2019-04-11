@@ -163,12 +163,12 @@ class TransporterRegistry(ConsumerRegistry):
     inherit = Uni_Manager()
     def __str__(self):  # print的时候好看，类似于C++的重载<<
             return self.ConsumerId
-
+'''
     def to_front(self):
         listtemp = [f.name for f in self._meta.fields]
         listtemp.remove('consumerregistry_ptr')
         return json.dumps(dict([(attr, getattr(self, attr)) for attr in listtemp]), cls=DateEncoder)
-
+'''
     # model的内部写一个函数返回json
     def toJSON(self):
             return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]))
@@ -275,9 +275,12 @@ class ProductionData(models.Model):
     Weight=models.FloatField()
     BodyTemperature=models.FloatField()
     UCLLink=models.CharField(max_length=50)
+
     # MonitorRecordTime=models.TimeField()#timestamp()
     MonitorRecordTime = models.DateTimeField(default=timezone.now())
     Flag = models.IntegerField(default=0)
+
+    MonitorRecordTime=models.DateTimeField(default=timezone.now, null=True)
     def __str__(self):  # print的时候好看，类似于C++的重载<<
             return self.RecordID
 
@@ -458,6 +461,15 @@ class DateEncoding(json.JSONEncoder):
 
 
 
+
+class BaseStationData(models.Model):
+    UUID = models.CharField(max_length=50,default='',blank=True)  # 终端编号
+    Time = models.DateTimeField(default=date.today)
+    Index = models.IntegerField()
+    Data1 = models.CharField(max_length=20,default='',blank=True)
+    Data2 = models.CharField(max_length=20,default='',blank=True)
+    Sheep_Id = models.ForeignKey('ProductionData',on_delete=models.CASCADE,null=True)
+    SheepID = models.CharField(max_length=20, null=True)
 
 
 
