@@ -349,6 +349,19 @@ def origin(request):
         try:
             ret = []
             #生产表的查询
+            temp1 = models.ProductionData.objects.filter(RecordID=sheep_id)
+            print("shee_id: %s" %(sheep_id))
+            if (temp1):
+                for sample1 in temp1:
+                    #print("id %s" % (temp_person.ConsumerName))
+                    #print(temp_person.ConsumerName)
+                    i = model_to_dict(sample1)
+                    i.pop("id")
+                    #i.update({'b': 2}) #更改
+                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+                    print("运输表1 有数据")
+            else:
+                print("运输表1没有数据")
 
             # 运输表的查询
             temp2 = models.TransportData.objects.filter(ProductionID=sheep_id, Transport_Flag=30)
