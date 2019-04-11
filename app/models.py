@@ -410,6 +410,14 @@ class UUID_Sheep(models.Model):
     RecordID = models.CharField(max_length=25, null=True)
     PB_Flag = models.IntegerField(default=0, null=True)
 
+class BaseStationData(models.Model):
+    UUID = models.CharField(max_length=50,default='',blank=True)  # 终端编号
+    Time = models.DateTimeField(default=date.today)
+    Index = models.IntegerField()
+    Data1 = models.CharField(max_length=20,default='',blank=True)
+    Data2 = models.CharField(max_length=20,default='',blank=True)
+    Sheep_Id = models.ForeignKey('ProductionData',on_delete=models.CASCADE,null=True)
+
 
 
 
