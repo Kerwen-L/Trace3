@@ -82,7 +82,7 @@ class CompanyRegistry(models.Model):
     InvestigateRes = models.IntegerField(default=0)                                     # 生产地实地考察结果
     BLicenseRegisterNo = models.CharField(max_length=20)                                # 营业执照注册号
     BLicenseSrc = models.CharField(max_length=50)                                       # 营业执照图片地址
-    BLicenseDeadline=models.DateField(default=date.today)                               # 营业执照经营期限
+    BLicenseDeadline = models.DateField(default=date.today)                               # 营业执照经营期限
     PLicenseNo = models.CharField(max_length=30)                                        # 生产许可证编号
     PLicenseSrc = models.CharField(max_length=40)                                       # 生产许可证图片地址
     PLicenseDeadline = models.DateField(default=date.today)                             # 生产许可证生产期限
@@ -118,7 +118,8 @@ class ProducerRegistry(ConsumerRegistry):
     #ProducerName=models.CharField(max_length=10)
     IDNo=models.CharField(max_length=18)                       # 生产人员身份证号，18位
     #ContactNo=models.BigIntegerField()
-    RegisterTime=models.DateField(default=date.today)
+    # RegisterTime=models.DateField(default=date.today)
+    RegisterTime = models.DateField(default=date.today)
     ProductionPlace=models.CharField(max_length=30,null=True)
     ProductionKind=models.IntegerField(default=0,null=True)
     ProductionScale=models.CharField(max_length=100,null=True)#这里存json
@@ -171,6 +172,19 @@ class TransporterRegistry(ConsumerRegistry):
     # model的内部写一个函数返回json
     def toJSON(self):
             return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]))
+
+    def to_front(self):#20190410新增
+        templist = []
+        for key in self._meta.fields:
+            templist.append(key.name)  # 获得属性域
+
+        templist.remove('consumerregistry_ptr')
+        templist.remove('companyregistry')
+        templist.remove('imgwork')
+        templist.remove('imgquality')
+        templist.remove('imgID')
+
+        return json.dumps(dict([(attr, getattr(self, attr)) for attr in templist]),cls=DateEncoder)
 
 
 # 检疫员注册表
@@ -284,7 +298,7 @@ class BaseStationData(models.Model):
     Index = models.IntegerField()
     Data1 = models.CharField(max_length=20,default='',blank=True)
     Data2 = models.CharField(max_length=20,default='',blank=True)
-    Sheep_Id = models.ForeignKey('ProductionData',on_delete=models.CASCADE,null=True)
+    Sheep_Id = models.CharField(max_length=20,default='',blank=True)
 
 
 # ID绑定表
@@ -295,9 +309,14 @@ class UUID_Sheep(models.Model):
 
 
 # UCL数据表
-'''
-    暂时缺省
-'''
+class UCLData(models.Model):
+    ProductionId = models.CharField(max_length=16)      # 产品编号
+    UCLPack = models.CharField(max_length=1024)         # UCL包（UCL包字符串形式，Base64编码）
+    Flag = models.IntegerField()                        # 环节标识（表明UCL存储在哪个环节的服务器时）
+    isLatest = models.IntegerField()                    # 分支标识（标识是否该ProductionId对应的最新的UCL包）
+    SerialNum = models.IntegerField()                   # 顺序号（溯源树的层数，与ProductionId结合，唯一标识一个UCL包）
+    UCLSrc = models.CharField(max_length=255)           # UCL存储地址（在各个服务器上的存储地址）
+    RelatedUCLId = models.IntegerField()                # 关联UCL的id
 
 
 # 检疫数据表
@@ -309,7 +328,8 @@ class QuarantineData(models.Model):
     QuarantineLocation = models.CharField(max_length=100)
     QuarantineRes = models.CharField(max_length=100)
     QuarantineLink = models.CharField(max_length=100, null=True, blank=True)
-    QuarantineTime = models.DateField(default=date.today)
+    # QuarantineTime = models.DateField(default=date.today)
+    QuarantineTime = models.DateTimeField(default=timezone.now())
     QuarantineBatch = models.CharField(max_length=50)
     QuarantineUCLLink = models.CharField(max_length=100, null=True, blank=True)
     Applicant = models.CharField(max_length=30)
@@ -329,7 +349,8 @@ class ProcessData(models.Model):
     ConsumerId = models.CharField(max_length=10)              #加工人员ID 继承与消费者ID
 #    ProcessPersonID = models.ForeignKey('ProcessorRegistry',on_delete=models.CASCADE,)
     ProcessLocation = models.CharField(max_length=7)               #加工地 (企业编号7)
-    ProcessTime = models.DateField(default=date.today)             #加工时间
+    # ProcessTime = models.DateField(default=date.today)             #加工时间
+    ProcessTime = models.DateTimeField(default=timezone.now())  # 加工时间
     ProductionKind = models.IntegerField()                         #生产内容类型(分割为几个)
     ReproductionID = models.CharField(max_length=16)              #生产内容ID演化
     QRCodeLink = models.CharField(max_length=50)                     #二维码地址
@@ -352,8 +373,10 @@ class TransportData(models.Model):
     From=models.CharField(max_length=50)
     To=models.CharField(max_length=50)
     Flag=models.IntegerField(default=2)                               #环节标志
-    TransactionStartTime=models.DateTimeField(default=date.today)         #流通开始时间
-    TransactionEndTime=models.DateTimeField(default=date.today)
+    # TransactionStartTime=models.DateTimeField(default=date.today)         #流通开始时间
+    # TransactionEndTime=models.DateTimeField(default=date.today)
+    TransactionStartTime = models.DateTimeField(default=timezone.now())  # 流通开始时间
+    TransactionEndTime = models.DateTimeField(default=timezone.now())
     TransactionStartUCLLink=models.CharField(max_length=50)           #起点UCL索引
     TransactionEndUCLLink=models.CharField(max_length=50)
     Transport_Flag = models.IntegerField(default=0)
@@ -375,7 +398,8 @@ class SellData(models.Model):
     # ProductionID = models.BigIntegerField()                 #生产内容ID/生产内容再加工ID(销售内容ID)
     ProductionID = models.CharField(max_length=16,null=True,blank=True)  # 生产内容ID/生产内容再加工ID(销售内容ID)
     # SellLocation = models.CharField(max_length=50,null=True,blank=True)  # 销售地
-    SPReceiveTime = models.DateTimeField()  # 销售点接收时间
+    # SPReceiveTime = models.DateTimeField()  # 销售点接收时间
+    SPReceiveTime = models.DateTimeField(default=timezone.now())  # 销售点接收时间
     SPSelloutTime = models.DateTimeField(null=True,blank=True)  # 销售点售出时间(为空则未销售)
     Price = models.IntegerField()  # 销售价格(避免销售点恶意抬价)
     APApprovalRes = models.IntegerField(default=0)  # 被溯源次数
