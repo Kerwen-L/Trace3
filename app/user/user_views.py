@@ -354,8 +354,6 @@ def origin(request):
             temp2 = models.TransportData.objects.filter(ProductionID=sheep_id, Transport_Flag=30)
             if (temp2):
                 for sample2 in temp2:
-#                    p_ID = sample2.TransactionPersonID
-#                    print("p_ID is %s" % ( p_ID ))
                     temp_person = models.TransporterRegistry.objects.get(IDNo=sample2.TransactionPersonID)
 #                    print("id %s" % (temp_person.ConsumerName))
 #                    print(temp_person.ConsumerName)
@@ -363,7 +361,6 @@ def origin(request):
                     i.pop("id")
                     i.update({'TransactionPersonID': temp_person.ConsumerName}) #修改
 #                    i.update({'b': 2}) #更改
-#                    i["TransactionPersonID"]=temp_person.
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
                     print("运输表1 有数据")
             else:
@@ -397,35 +394,48 @@ def origin(request):
             #加工表数据查询
             temp5 = models.ProcessData.objects.get(ReproductionID=production_id)
             if(temp5):
-                n = temp5.Step
-#                print("n: %s" % (n))
-                if(n==4):
-#                    print(production_id)
-                    tempp = models.ProcessData.objects.get(ReproductionID=production_id)
-#                    print("ProcessID is %s"%(tempp.ProcessID))
-#                    print("ConsumerID is %s"%(tempp.ConsumerId))
-                    temp_person = models.ProcessorRegistry.objects.get(id=tempp.ConsumerId)
-#                    print(temp_person.ConsumerName)
-#                    print("...........")
-                    i = model_to_dict(tempp)
-                    i.pop("id")
-                    i.update({'ConsumerId': temp_person.ConsumerName})  # 修改
-                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
-                for n in [3, 2, 1]:
-                    i = 8+2*n
-                    serch_id = production_id[0:i]+''+id[n]
-#                    print(serch_id)
-                    tempp1 = models.ProcessData.objects.get(ReproductionID=serch_id)
-#                    print("ProcessID is %s" % (tempp1.ProcessID))
-#                    print("ConsumerID is %s" % (tempp1.ConsumerId))
-                    temp_person1 = models.ProcessorRegistry.objects.get(id=tempp1.ConsumerId)
-#                    print("ConsumerID is %s" % (temp_person1.id))
-#                    print(temp_person1.ConsumerName)
-#                    print("...........")
-                    i = model_to_dict(tempp1)
-                    i.pop("id")
-                    i.update({'ConsumerId': temp_person1.ConsumerName})  # 修改
-                    ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+                n = temp5.Step #最大值
+                t = n
+                stack =[] #创建一个栈
+                while t >0:
+                    stack.append(t)  #添加元素
+                    t = t - 1
+#                    print("t: %s" %(t))
+#                print("lenth is %s " % (len(stack)))
+#                print(stack)
+                for j in range(len(stack)):
+                    k = stack.pop()
+                    if(k < 4):
+                        i = 8 + 2 * k
+                        #print("k: %s" %(k))
+                        #print("j: %s" %(j))
+                        #print("i: %s" %(i))
+                        serch_id = production_id[0:i] + '' + id[k]
+                        print(serch_id)
+                        tempp1 = models.ProcessData.objects.get(ReproductionID=serch_id)
+                        #print("ProcessID is %s" % (tempp1.ProcessID))
+                        #print("ConsumerID is %s" % (tempp1.ConsumerId))
+                        temp_person1 = models.ProcessorRegistry.objects.get(id=tempp1.ConsumerId)
+                        #print("ConsumerID is %s" % (temp_person1.id))
+                        #print(temp_person1.ConsumerName)
+                        print("...........")
+                        i = model_to_dict(tempp1)
+                        i.pop("id")
+                        i.update({'ConsumerId': temp_person1.ConsumerName})  # 修改
+                        ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
+                    j=j+1
+                    if(k==4):
+                        print(production_id)
+                        tempp = models.ProcessData.objects.get(ReproductionID=production_id)
+#                       print("ProcessID is %s"%(tempp.ProcessID))
+#                       print("ConsumerID is %s"%(tempp.ConsumerId))
+                        temp_person = models.ProcessorRegistry.objects.get(id=tempp.ConsumerId)
+#                       print(temp_person.ConsumerName)
+                        print("...........")
+                        i = model_to_dict(tempp)
+                        i.pop("id")
+                        i.update({'ConsumerId': temp_person.ConsumerName})  # 修改
+                        ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
                 print("加工表 有数据")
             else:
                 print("加工表没有数据")
