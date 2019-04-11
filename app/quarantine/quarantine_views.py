@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 from django.shortcuts import HttpResponse
 from app import models
-from datetime import datetime
 from app.models import DateEncoder
 from random import randint
 import hashlib
@@ -26,10 +25,15 @@ from app.ucl import ucl
 def quarantine_submit(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        uclstr, link = ucl.request_to_uclstr(data)
+        print(data)
+        uclstr = data['ucl']
+        flag = data['flag']
+        serialnumber = data['serialnumber']
+        productionId = data['productionId']
         print("uclStrBase64:" + uclstr)
-        contentdict = ucl.unpack(uclstr, link)
+        [contentdict, uclpath] = ucl.unpack(uclstr, flag, productionId, serialnumber)
         print(contentdict)
+        print(uclpath)
         quarantinedata.submit(contentdict)
         print("检疫数据上传数据库成功!")
     return HttpResponse("检疫数据上传数据库成功!")
@@ -83,7 +87,7 @@ def quarantiner_registry(request):
 
         quarantiner_id = items.get("QuarantinePersonID")
         password = items.get("Password")
-        registertime = items.get("RegisterTime", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        registertime = items.get("RegisterTime", datetime.now().strftime('%Y-%m-%d'))
         items['RegisterTime'] = registertime
 
         items['Password'] = encrypt(password)

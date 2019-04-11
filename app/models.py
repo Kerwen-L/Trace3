@@ -272,7 +272,7 @@ class ProductionData(models.Model):
     UCLLink=models.CharField(max_length=50)
 
     # MonitorRecordTime=models.TimeField()#timestamp()
-    MonitorRecordTime = models.DateTimeField(default=timezone.now())
+    MonitorRecordTime = models.DateTimeField(default=timezone.now)
     Flag = models.IntegerField(default=0)
 
     def __str__(self):  # print的时候好看，类似于C++的重载<<
@@ -330,7 +330,7 @@ class QuarantineData(models.Model):
     QuarantineRes = models.CharField(max_length=100)
     QuarantineLink = models.CharField(max_length=100, null=True, blank=True)
     # QuarantineTime = models.DateField(default=date.today)
-    QuarantineTime = models.DateTimeField(default=timezone.now())
+    QuarantineTime = models.DateTimeField(default=timezone.now)
     QuarantineBatch = models.CharField(max_length=50)
     QuarantineUCLLink = models.CharField(max_length=100, null=True, blank=True)
     Applicant = models.CharField(max_length=30)
@@ -351,7 +351,7 @@ class ProcessData(models.Model):
 #    ProcessPersonID = models.ForeignKey('ProcessorRegistry',on_delete=models.CASCADE,)
     ProcessLocation = models.CharField(max_length=7)               #加工地 (企业编号7)
     # ProcessTime = models.DateField(default=date.today)             #加工时间
-    ProcessTime = models.DateTimeField(default=timezone.now())  # 加工时间
+    ProcessTime = models.DateTimeField(default=timezone.now)  # 加工时间
     ProductionKind = models.IntegerField()                         #生产内容类型(分割为几个)
     ReproductionID = models.CharField(max_length=16)              #生产内容ID演化
     QRCodeLink = models.CharField(max_length=50)                     #二维码地址
@@ -376,8 +376,8 @@ class TransportData(models.Model):
     Flag=models.IntegerField(default=2)                               #环节标志
     # TransactionStartTime=models.DateTimeField(default=date.today)         #流通开始时间
     # TransactionEndTime=models.DateTimeField(default=date.today)
-    TransactionStartTime = models.DateTimeField(default=timezone.now())  # 流通开始时间
-    TransactionEndTime = models.DateTimeField(default=timezone.now())
+    TransactionStartTime = models.DateTimeField(default=timezone.now)  # 流通开始时间
+    TransactionEndTime = models.DateTimeField(default=timezone.now)
     TransactionStartUCLLink=models.CharField(max_length=50)           #起点UCL索引
     TransactionEndUCLLink=models.CharField(max_length=50)
     Transport_Flag = models.IntegerField(default=0)
@@ -400,7 +400,7 @@ class SellData(models.Model):
     ProductionID = models.CharField(max_length=16,null=True,blank=True)  # 生产内容ID/生产内容再加工ID(销售内容ID)
     # SellLocation = models.CharField(max_length=50,null=True,blank=True)  # 销售地
     # SPReceiveTime = models.DateTimeField()  # 销售点接收时间
-    SPReceiveTime = models.DateTimeField(default=timezone.now())  # 销售点接收时间
+    SPReceiveTime = models.DateTimeField(default=timezone.now)  # 销售点接收时间
     SPSelloutTime = models.DateTimeField(null=True,blank=True)  # 销售点售出时间(为空则未销售)
     Price = models.IntegerField()  # 销售价格(避免销售点恶意抬价)
     APApprovalRes = models.IntegerField(default=0)  # 被溯源次数
