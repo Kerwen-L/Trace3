@@ -119,10 +119,10 @@ def ProcessData_Add(request):
             #图片对应的地址
             src="http://"+url1+":8000/process/qrcode_process/"+demo1.get("ReproductionID")+".png"
 #            src = "http://"+url1+":8000/process/qrcode_process/1234567801010101.png"
-
+            print("src is %s"%(src))
             #添加 加工数据表添加QRcode
-
-            ddd=models.ProcessData.objects.get(ReproductionID=demo1.get("ReproductionID"))
+            ddd = models.ProcessData.objects.get(ReproductionID=demo1.get("ReproductionID"))
+            print(demo1.get("ReproductionID"))
             ddd.QRCodeLink = demo1.get("ReproductionID")
             ddd.save()
             print("加工数据添加成功")
