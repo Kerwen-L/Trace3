@@ -106,13 +106,14 @@ def ProcessData_Add(request):
         try:
             models.ProcessData(**json.loads(request.body)).save()
             demo1 = json.loads(request.body)
+            # 对应的加工者的加工次数+1，并保存
             person = demo1.get("ConsumerId")
             temp1 = models.ProcessorRegistry.objects.get(ConsumerId = person)  # 在数据库查找对象temp1
             temp1.ProcessorCounts = temp1.ProcessorCounts + 1 #对应的加工人员的加工次数+1
             temp1.save()
 
-            img = qrcode.make('{ProductionId:'+person+'}')
-            img.save('test'+person+'.png')
+            img = qrcode.make('{ProductionID:'+demo1.get("ReproductionID")+'}')
+            img.save("qrcode_process/"+demo1.get("ReproductionID")+".png")
 
             print("加工数据添加成功")
             return HttpResponse("加工数据上传数据库成功!")
