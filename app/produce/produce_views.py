@@ -109,6 +109,7 @@ def producer_alter_farm(request):  # 只能改CompanyName OperatingPlace，即�
 
 
 def sheep_state(request):
+    import random
 
     dic = json.loads(request.body.decode())
     RecordID = dic["RecordID"]
@@ -117,8 +118,13 @@ def sheep_state(request):
     UUID = uuid_temp.first().UUID  # 在中间表找到该羊对应的项圈ID
     base_data = models.BaseStationData.objects.filter(UUID=UUID, SheepID=RecordID)  # 这里应该有很多条数据
     for obj in base_data:
-        models.ProductionData.objects.create(RecordID=RecordID, MonitorId=UUID,
-                                             State=1, HealthState=1, ActiveDis=33.6, Weight=60.02, BodyTemperature=20.1,
+        HealthState = int(random.choice("01"))
+        GPSLocation = "朔州"
+        ActiveDis = round(random.uniform(20, 80), 3)  #精度为3位
+        Weight = round(random.uniform(40, 70), 3)
+        BodyTemperature = round(random.uniform(20, 30), 3)
+        models.ProductionData.objects.create(RecordID=RecordID, MonitorId=UUID, GPSLocation=GPSLocation,
+                                             State=0, HealthState=HealthState, ActiveDis=ActiveDis, Weight=Weight, BodyTemperature=BodyTemperature,
                                                 MonitorRecordTime=obj.Time)  # 这里应该是BodyTemperature=obj.Data1,但是Data1布吉岛是什么鸡巴，只能写死呵呵
     sheep_final = models.ProductionData.objects.filter(RecordID=RecordID)
     data = serializers.serialize("json", sheep_final)
@@ -148,14 +154,15 @@ def sheep_state(request):
 
 
 def fully_grown(request):
-    sheep_id = request.GET.get("Sheep_Id")
-    temp = models.ProductionData.objects.filter(RecordID__contains=sheep_id).first()
-    if temp.State == 0:
-        temp.State = 2
-        temp.save()
-        return HttpResponse("出栏成功！")
-    else:
-        return HttpResponse("出栏失败！")
+    sheep_id = request.GET.get("SheepID")
+    temp = models.ProductionData.objects.filter(RecordID=sheep_id)
+    for obj in temp:
+        if obj.State == 0:
+            obj.State = 1
+            obj.save()
+        else:
+            return HttpResponse("出栏失败")
+    return HttpResponse("出栏成功")
 
 
 idcountsheep = 0  # 羊的自增全局变量
@@ -174,8 +181,9 @@ def input_sheep(request):
     import random
     province = str(random.randint(1, 34)).zfill(2)  # 随机生成省份，占两位
     global idcountsheep
-    RecordID = province + str(idcountsheep).zfill(8)
+    RecordID = province + str(idcountsheep).zfill(6)
     idcountsheep += 1
+    RecordID += "00000000"
 
     temp = models.UUID_Sheep.objects.filter(UUID=UUID, PB_Flag=1)
     print(temp)
@@ -186,7 +194,9 @@ def input_sheep(request):
     models.UUID_Sheep.objects.create(UUID=UUID, PB_Flag=PB_Flag, RecordID=RecordID)
     img = qrcode.make(RecordID)  # eval(str)
     img.save("qrcode_origin/"+RecordID+".png")
-    return HttpResponse("羊录入成功")
+    url = "http://223.3.79.211:8000/user/qrcode_origin/"+RecordID+".png"
+    return HttpResponse(url)
+    # http://223.3.79.211:8000/user/qrcode_origin/RecordID.png
 
 def test(request):
     global idcountsheep
