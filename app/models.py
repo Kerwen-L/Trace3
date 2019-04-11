@@ -298,7 +298,8 @@ class BaseStationData(models.Model):
     Index = models.IntegerField()
     Data1 = models.CharField(max_length=20,default='',blank=True)
     Data2 = models.CharField(max_length=20,default='',blank=True)
-    Sheep_Id = models.CharField(max_length=20,default='',blank=True)
+    Sheep_Id = models.ForeignKey('ProductionData')
+    SheepID = models.CharField(max_length=20,default='',blank=True)
 
 
 # ID绑定表
