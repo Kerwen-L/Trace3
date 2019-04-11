@@ -157,7 +157,7 @@ class TransporterRegistry(ConsumerRegistry):
     TransportCounts=models.IntegerField(default=0)
     Flag = models.IntegerField(default=0)
     #Password=models.CharField(max_length=30)
-    PricateKey = models.CharField(max_length=1024, null=True)  # 私钥
+    PrivateKey = models.CharField(max_length=1024, null=True)  # 私钥
     PublicKey = models.CharField(max_length=1024, null=True)  # 公钥
     imgID = models.ImageField(upload_to='images/', default="")
     imgwork = models.ImageField(upload_to='images/', default="")
