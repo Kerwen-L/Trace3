@@ -361,9 +361,9 @@ def origin(request):
                     i.pop("id")
                     #i.update({'b': 2}) #更改
                     ret.append(json.dumps(i, cls=models.DateEncoder, ensure_ascii=False))
-                    print("运输表1 有数据")
+                print("生产表 有数据")
             else:
-                print("运输表1没有数据")
+                print("生产表没有数据")
 
             # 运输表的查询
             temp2 = models.TransportData.objects.filter(ProductionID=sheep_id, Transport_Flag=30)
