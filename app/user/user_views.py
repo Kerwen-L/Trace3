@@ -501,13 +501,28 @@ def test(request):
 
 
 
-def seceret(request):
-    # dic = json.loads(request.body.decode())
-    # ConsumerId = dic["ConsumerId"]
-    # Flag = dic["Flag"]  # 生，检，加，运，销 分别为 1,2,3,4,5
-    a = models.ConsumerRegistry.objects.first()
-    print(a.producerregistry.IDNo)
-    return HttpResponse("test ing")
+def secret(request):
+    dic = json.loads(request.body.decode())
+    ConsumerId = dic["ConsumerId"]
+    flag = dic["flag"]  # 生，检，加，运，销 分别为 1,2,3,4,5
+    a = models.ConsumerRegistry.objects.get(ConsumerId=ConsumerId)  # 由于这里是登陆进来之后的操作，所以不存在用户不存在的情况，所以直接用get好了
+    dic2 = {}
+    if flag == 1:
+        dic2["PrivateKey"] = a.producerregistry.PrivateKey
+        dic2["PublicKey"] = a.producerregistry.PublicKey
+    elif flag == 2:
+        dic2["PrivateKey"] = a.quarantineregistry.PrivateKey
+        dic2["PublicKey"] = a.quarantineregistry.PublicKey
+    elif flag == 3:
+        dic2["PrivateKey"] = a.processorregistry.PrivateKey
+        dic2["PublicKey"] = a.processorregistry.PublicKey
+    elif flag == 4:
+        dic2["PrivateKey"] = a.transporterregistry.PrivateKey
+        dic2["PublicKey"] = a.transporterregistry.PublicKey
+    elif flag == 5:
+        dic2["PrivateKey"] = a.sellerregistry.PrivateKey
+        dic2["PublicKey"] = a.sellerregistry.PublicKey
+    return HttpResponse(json.dumps(dic2, ensure_ascii=False), content_type="application/json")  # 返回公私钥
 
 
 

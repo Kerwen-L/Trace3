@@ -13,5 +13,6 @@ urlpatterns = [
     url(r'^update', user_views.update),  # 更改
     url(r'^origin/$', user_views.origin),  # 更改
     url(r'^img_fulfil', user_views.fulfil_img),
+    url(r'^secret', user_views.secret),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)+static(settings.QRCODE_ORIGIN_URL, document_root=settings.QRCODE_ORIGIN_ROOT)
 
