@@ -266,7 +266,8 @@ class SellerRegistry(ConsumerRegistry):
 class ProductionData(models.Model):
     RecordID=models.CharField(max_length=25)
     # MonitorId=models.BigIntegerField()
-    MonitorId = models.CharField(max_length=25)
+    # MonitorId = models.CharField(max_length=25)
+    MonitorId = models.CharField(max_length=50)
     State=models.IntegerField()
     HealthState=models.SmallIntegerField()
     GPSLocation=models.CharField(max_length=50)#json存经纬度
@@ -274,7 +275,8 @@ class ProductionData(models.Model):
     Weight=models.FloatField()
     BodyTemperature=models.FloatField()
     UCLLink=models.CharField(max_length=50)
-    MonitorRecordTime=models.TimeField()#timestamp()
+    # MonitorRecordTime=models.TimeField()#timestamp()
+    MonitorRecordTime = models.DateTimeField(default=timezone.now())
     Flag = models.IntegerField(default=0)
     def __str__(self):  # print的时候好看，类似于C++的重载<<
             return self.RecordID
