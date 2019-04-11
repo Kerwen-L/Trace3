@@ -105,8 +105,9 @@ def register(request):  # 少一个企业的注册
     province = str(random.randint(1, 34)).zfill(2)
     if characterflag == "1":
         global idcountper
-        ID = province + str(idcountper).zfill(8)
-        idcountper += 1
+        # ID = province + str(idcountper).zfill(8)
+        # idcountper += 1
+        ID = province + str(random.randint(1, 99999999)).zfill(8)
         models.ConsumerRegistry(**json.loads(request.body), ConsumerId=ID).save()
         print(request.body)
         dict_ = {
@@ -117,8 +118,9 @@ def register(request):  # 少一个企业的注册
 
     else:
         global idcountcom
-        ID = province + str(idcountcom).zfill(5)
-        idcountcom += 1
+        # ID = province + str(idcountcom).zfill(5)
+        # idcountcom += 1
+        ID = province + str(random.randint(1, 99999)).zfill(5)
         models.CompanyRegistry(**json.loads(request.body), CompanyId=ID).save()
         dict_ = {
             "CompanyId": ID,

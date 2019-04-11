@@ -181,8 +181,9 @@ def input_sheep(request):
     import random
     province = str(random.randint(1, 34)).zfill(2)  # 随机生成省份，占两位
     global idcountsheep
-    RecordID = province + str(idcountsheep).zfill(6)
-    idcountsheep += 1
+    # RecordID = province + str(idcountsheep).zfill(6)
+    # idcountsheep += 1
+    RecordID = province + str(random.randint(1, 999999)).zfill(6)
     RecordID += "00000000"
 
     temp = models.UUID_Sheep.objects.filter(UUID=UUID, PB_Flag=1)
