@@ -1,11 +1,12 @@
 # process的二级目录设置
 from django.conf.urls import url
 from app.process import process_views
-
+import Trace3.settings as settings
+from django.contrib.staticfiles.urls import static
 
 urlpatterns = [
     # 人员-添加
-    # url(r'^person_add', views.Processor_Add),
+    # url(r'^processor_add', views.Processor_Add),
     # 人员-查询
     url(r'^processor_inquiry/$', process_views.Processor_Inquiry),
     # 人员-更改
@@ -17,6 +18,7 @@ urlpatterns = [
     url(r'^processtion_add',process_views.ProcessData_Add),
     # 结果-查询
     url(r'^processtion_inquiry/$',process_views.ProcessData_Inquiry),  # 一对多
+]+static(settings.QRCODE_PROCESS_URL, document_root=settings.QRCODE_PROCESS_ROOT)
 
-]
+
 
