@@ -32,7 +32,7 @@ def unpack(uclstr, link= 'quarantine', productionid='3000000001', serial='40'):
     new_cmd = " ".join(unpack_cmd)
     res = subprocess.Popen(new_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     jsonstr = str(res.stdout.readline(), encoding='gbk')
-    print(jsonstr)
+    print(jsonstr, "\n")
     res.terminate()
 
     # 字典形式返回内容对象域数据

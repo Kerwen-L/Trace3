@@ -502,28 +502,40 @@ def test(request):
     pk.generate_key(TYPE_RSA, 512)
 
     pri_key = dump_privatekey(FILETYPE_PEM, pk)  # 生成私钥
+    pri_key = pri_key[28:-27]
+    pri_key = pri_key.decode()
     print("未64前", pri_key)
-    byte_base64 = base64.b64encode(pri_key)
-    pri_key_base64 = str(byte_base64, 'utf-8')
-    print("base64后", pri_key_base64)
-    # print("pri_key切片前", pri_key_base64)
-    # pri_key_base64 = pri_key_base64[28:-27]
-    # print("pri_key切片后", pri_key_base64)
+
+    # byte_base64 = base64.b64encode(pri_key)
+    # pri_key_base64 = str(byte_base64, 'utf-8')
 
     pub_key = dump_publickey(FILETYPE_PEM, pk)  # 生成公钥
-    byte_base64 = base64.b64encode(pub_key)
-    pub_key_base64 = str(byte_base64, 'utf-8')
-    # print("pub_key切片前", pub_key_base64)
-    # pub_key_base64 = pub_key_base64[28:-27]
-    # print("pub_key切片后", pub_key_base64)
+    pub_key = pub_key[28:-27]
     dic = {}
-    dic["pri_key_base64"] = pri_key_base64
-    # dic["pub_key"] = pub_key.decode()
-    dic["pub_key_base64"] = pub_key_base64
-    # print(type(pri_key))
-    # print(dic)
+    dic["pri_key"] = pri_key
+    dic["pub_key"] = pub_key.decode()
     return HttpResponse(json.dumps(dic, ensure_ascii=False), content_type="application/json")  # 返回公私钥
-    # return HttpResponse("测试ing")
+    # return HttpResponse(pri_key)
+
+def seceret(request):
+    pk = PKey()
+
+    pk.generate_key(TYPE_RSA, 512)
+
+    pri_key = dump_privatekey(FILETYPE_PEM, pk)  # 生成私钥
+    pri_key = pri_key[28:-27]
+    pri_key = pri_key.decode()
+    print("未64前", pri_key)
+
+    # byte_base64 = base64.b64encode(pri_key)
+    # pri_key_base64 = str(byte_base64, 'utf-8')
+
+    pub_key = dump_publickey(FILETYPE_PEM, pk)  # 生成公钥
+    pub_key = pub_key[28:-27]
+    dic = {}
+    dic["pri_key"] = pri_key
+    dic["pub_key"] = pub_key.decode()
+    return HttpResponse(json.dumps(dic, ensure_ascii=False), content_type="application/json")  # 返回公私钥
 
 
 
