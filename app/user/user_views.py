@@ -211,7 +211,7 @@ def fulfil(request):  # 个人信息完善函数,这个函数也要返回完善�
 
 
     def quarantine():
-        aaa = models.QuarantineRegistry.inherit.update(models.ProducerRegistry, CompanyName, **dicttemp)
+        aaa = models.QuarantineRegistry.inherit.update(models.QuarantineRegistry, CompanyName, **dicttemp)
         if aaa == 0:
             return 0
         else:
@@ -220,7 +220,7 @@ def fulfil(request):  # 个人信息完善函数,这个函数也要返回完善�
 
 
     def processor():
-        aaa = models.ProcessorRegistry.inherit.update(models.ProducerRegistry, CompanyName, **dicttemp)
+        aaa = models.ProcessorRegistry.inherit.update(models.ProcessorRegistry, CompanyName, **dicttemp)
         if aaa == 0:
             return 0
         else:
@@ -229,7 +229,7 @@ def fulfil(request):  # 个人信息完善函数,这个函数也要返回完善�
 
 
     def trans():
-        aaa = models.TransporterRegistry.inherit.update(models.ProducerRegistry, CompanyName, **dicttemp)
+        aaa = models.TransporterRegistry.inherit.update(models.TransporterRegistry, CompanyName, **dicttemp)
         if aaa == 0:
             return 0
         else:
@@ -238,7 +238,7 @@ def fulfil(request):  # 个人信息完善函数,这个函数也要返回完善�
 
 
     def seller():
-        aaa = models.SellerRegistry.inherit.update(models.ProducerRegistry, CompanyName, **dicttemp)
+        aaa = models.SellerRegistry.inherit.update(models.SellerRegistry, CompanyName, **dicttemp)
         if aaa == 0:
             return 0
         else:
