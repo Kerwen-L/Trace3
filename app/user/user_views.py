@@ -180,7 +180,7 @@ def fulfil(request):  # 个人信息完善函数,这个函数也要返回完善�
     characterflag = request.GET.get("CharacterFlag")  # 表明要完善哪个角色
     # 0为生产者；1为检疫员；2为加工员；3为运输员；4为销售员；5为普通用户
     # 这个时候这个json里是有个人的ID的,因为登陆进去之后我是传了这个人的ID给前端的
-    dicttemp = json.loads(request.body.decode())
+    dicttemp = json.loads(request.body.decode())  # 完善的所有信息都在这个字典里
     print(dicttemp)
     ConsumerId = dicttemp["ConsumerId"]
     dicttemp.pop("ConsumerId")  # 把ConsumerId这个键值对删掉，免得后面重复
