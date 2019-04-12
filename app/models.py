@@ -388,8 +388,8 @@ class TransportData(models.Model):
     # TransactionEndTime=models.DateTimeField(default=date.today)
     TransactionStartTime = models.DateTimeField(default=timezone.now)  # 流通开始时间
     TransactionEndTime = models.DateTimeField(default=timezone.now)
-    TransactionStartUCLLink=models.CharField(max_length=50)           #起点UCL索引
-    TransactionEndUCLLink=models.CharField(max_length=50)
+    TransactionStartUCLLink=models.CharField(max_length=150)           #起点UCL索引
+    TransactionEndUCLLink=models.CharField(max_length=150)
     Transport_Flag = models.IntegerField(default=0)
     Flag = models.IntegerField(default=2)
     def __str__(self):
