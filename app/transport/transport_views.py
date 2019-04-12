@@ -5,23 +5,13 @@ from django.shortcuts import render_to_response
 import json
 from datetime import date
 from datetime import datetime
-
-
-class ComplexEncoder(json.JSONEncoder):                             #时间解析函数
-    def default(self, obj):
-        if isinstance(obj, datetime):
-            return obj.strftime('%Y-%m-%d %H:%M:%S')
-        elif isinstance(obj, date):
-            return obj.strftime('%Y-%m-%d')
-        else:
-            return json.JSONEncoder.default(self, obj)
-
+from app.ucl import ucl
 
 '''运输员队列生成'''
 transpoter_list = []
 def transporter_list_generate():
     flag = 0    #
-    templist = models.TransporterRegistry.objects.filter(Flag=0)                   # 从运输数据库中取出所有空闲记录
+    templist = models.TransporterRegistry.objects.filter(Flag=0)                # 从运输数据库中取出所有空闲记录
     if templist:
         for temp in templist:                                                   # 取出这些记录的生产内容id并形成list返回
             tempid = temp.ConsumerId
@@ -44,21 +34,24 @@ def transpoter_select_inproduct():                                          #返
     print("调用运输员选择函数")
     if transpoter_list.__len__() == 0:
         have_people = transporter_list_generate()                           #队列有内容，返回1，队列为空，返回0
-        print("运输员列表已从0更新")
-
+        if have_people==1:
+            print("运输员列表已从0更新")
+        else:
+            print("all busy")
+    #20190410修改
     if transpoter_list.__len__() >0:
-        id = transpoter_list[0]                                                 #选择第一个运输员
+        id = transpoter_list[0]                                                         #选择第一个运输员
         if models.TransporterRegistry.objects.filter(ConsumerId=id).update(Flag=1):     #修改标志位
             print("运输员标志位已经修改")
-        transpoter_recorder = models.TransporterRegistry.objects.get(ConsumerId=id) #查找记录
+        transpoter_recorder = models.TransporterRegistry.objects.get(ConsumerId=id)     #查找记录
         if transpoter_recorder:
             print("找到运输员的信息")
-        info_str = transpoter_recorder.to_front()                            #获取字符串形式的信息给前端
+        info_str = transpoter_recorder.to_front()                                       #获取字符串形式的信息给前端
         print("运输员的姓名" + transpoter_recorder.ConsumerName)
-        del transpoter_list[0]                                                  #从队列中删除
+        del transpoter_list[0]                                                          #从队列中删除
         return info_str  # 返回信息字符串
     else:
-        return HttpResponse("没有运输员处于空闲状态，请等待。。。") # 返回信息字符串
+        return HttpResponse("没有运输员处于空闲状态，请等待。。。")                    # 返回信息字符串
 
 def transpoter_regis(request):
     if request.method == "POST":
@@ -98,10 +91,60 @@ def transpoter_apply(request):
 '''商品信息扫码录入  前端发送生产内容id和人员id'''
 def product_enter(request):
     if request.method=="POST":
-        dict_get = json.loads(request.body)             #获得字典
-        models.TransportData.objects.create(**dict_get) #新增记录
-    return HttpResponse("录入完毕")
+        '''dict_get = json.loads(request.body)          #获得字典
+        models.TransportData.objects.create(**dict_get) #新增记录'''
+        #data = json.loads(request.body)  # 获得字典
+        # 以下内容为封包
+        # dict_get0 = json.loads(request.body)  # 获得字典
+        # dict_get1 = {}
+        # dict_get1['content']=dict_get0
+        # dict_get={}
+        # dict_get['cdps'] = dict_get1
+        # print(dict_get)
+        # b=json.dumps(dict_get)
+        # a=ucl.pack(b)#打包
+        # condict,path=ucl.unpack(a,'transport11')#解包
+        # print(condict)
+        # print(path)
+        # 以下内容为解包OK
+        dict_get0 = json.loads(request.body)
+        PackedUcl = dict_get0['ucl']
+        serialnumber = dict_get0['serialnumber']
+        productionId = dict_get0['productionId']                                            #
+        flag = dict_get0['flag']
 
+        dict_get,path = ucl.unpack(PackedUcl, 'transport',productionId,serialnumber)       #解包，返回解包地址
+        New_Recorder = models.TransportData.objects.create(**dict_get)  # 新增记录'''
+        if New_Recorder:
+            print(dict_get)
+            print(path)
+            return HttpResponse("OK")
+        else:
+            return HttpResponse("录入失败")
+
+
+
+        # 以下内容正常 没有ucl
+        #temp_person = models.TransporterRegistry.objects.filter(ConsumerId=data['TransactionPersonID'])
+        #20190410新增
+        # if temp_person:
+        #     print(temp_person[0].ConsumerName)
+        #     models.TransportData.objects.create(**data)
+        #     return HttpResponse("录入完毕")
+        # else:
+        #     print("查无此人")
+        #     return HttpResponse("查无此人")
+        # return HttpResponse(b)
+        # data = json.loads(request.body)
+        # uclstr = data['ucl']
+        # flag = data['flag']
+        # serialnumber = data['serialnumber']
+        # productionId = data['productionId']
+        # print("uclStrBase64:" + uclstr)
+        # [contentdict, uclpath] = ucl.unpack(uclstr, flag, productionId, serialnumber)
+        # print(contentdict)
+        # print(uclpath)
+        # return HttpResponse("OK")
 '''
 @运输数据 开始
 1、收到前端推送的运输数据
@@ -113,54 +156,68 @@ def product_enter(request):
 def Transport_start(request):
     if request.method=="POST":
         dict_get = json.loads(request.body)                                                # 获得字典
-        peoson_id=dict_get['TransactionPersonID']                                          # 解析运输人员id
-    models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=0).update(      # 更新前端推送内容到运输数据表
-        From=dict_get['From'],
-        To=dict_get['To'],
-        TransactionStartTime=dict_get['TransactionStartTime'],
-        Flag=1,
-    )
-    if dict_get['From'].find("牧场") >= 0:                                                 #模糊查询 说明运输员在生产运输阶段
-        print("开始更新生产数据 环节标志03")
-        list1 = models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=1)  #取出本次运输的全部生产商品记录
-        for record in list1:
-            models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
-                TransactionID=record.ProductionID + '30',
-                Transport_Flag=30,
-                TransactionStartUCLLink="UCL_product_begin",)
 
-    elif dict_get['From'].find("检疫") >= 0:                                               #模糊查询 说明运输员在检疫运输阶段
-        print("开始更新检疫数据 环节标志31")
-        list1 = models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=1)  #取出本次运输的全部检疫商品记录
-        for record in list1:
-            models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
-                TransactionID=record.ProductionID + '31',
-                Transport_Flag=31,
-                TransactionStartUCLLink = "UCL_quarantine_begin",)
+        PackedUcl = dict_get['ucl']
+        serialnumber = dict_get['serialnumber']
+        productionId = dict_get['productionId']                                            #
+        flag = dict_get['flag']
 
+        dict_get,Beginpath = ucl.unpack(PackedUcl, 'transport',productionId,serialnumber)       #解包，返回解包地址
+        print("path:"+Beginpath)
+        person_id=dict_get['TransactionPersonID']                                          # 解析运输人员id
+        print("personid是：  "+person_id)
 
-    elif dict_get['From'].find("加工") >= 0:                                               #模糊查询 说明运输员在加工运输阶段
-        print("开始更新加工数据 环节标志32")
-        list1 = models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=1)  #取出本次运输的全部加工商品记录
-        for record in list1:
-            models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
-                TransactionID=record.ProductionID + '32',
-                Transport_Flag=32,
-                TransactionStartUCLLink="UCL_process_begin",)
+    temp_person = models.TransporterRegistry.objects.filter(ConsumerId=dict_get['TransactionPersonID'])
+    if temp_person:
+        print("运输员的名字为: "+temp_person[0].ConsumerName)
+        flag = models.TransportData.objects.filter(TransactionPersonID=person_id,State=0)
+        if flag:
+            models.TransportData.objects.filter(TransactionPersonID=person_id,State=0).update(      # 更新前端推送内容到运输数据表
+                From=dict_get['From'],
+                To=dict_get['To'],
+                TransactionStartTime=dict_get['TransactionStartTime'],
+                State=1,
+                Flag=2,
+            )
+            if dict_get['From'].find("牧场") >= 0:                                                 #模糊查询 说明运输员在生产运输阶段
+                print("开始更新生产数据 环节标志30")
+                list1 = models.TransportData.objects.filter(TransactionPersonID=person_id,State=1)  #取出本次运输的全部生产商品记录
+                for record in list1:
+                    models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
+                        TransactionID=record.ProductionID + '30',
+                        Transport_Flag=30,
+                        Flag=2,
+                        TransactionStartUCLLink=Beginpath,)
+                    #在这里打包
+                    #uclstr, path = ucl.pack(jsonstr, flag, record.ProductionID, TotalDict['tag'])#ucl字符串，环节标志、生产id、顺序号
 
+            elif dict_get['From'].find("检疫") >= 0:                                               #模糊查询 说明运输员在检疫运输阶段
+                print("开始更新检疫数据 环节标志31")
+                list1 = models.TransportData.objects.filter(TransactionPersonID=person_id,State=1)  #取出本次运输的全部检疫商品记录
+                for record in list1:
+                    models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
+                        TransactionID=record.ProductionID + '31',
+                        Transport_Flag=31,
+                        Flag=2,
+                        TransactionStartUCLLink=Beginpath,)
 
-    elif dict_get['From'].find("超市") >= 0:                                               #模糊查询 说明运输员在销售运输阶段
-        print("开始更新销售数据 环节标志34")
-        list1 = models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=1)  #取出本次运输的全部销售商品记录
-        for record in list1:
-            models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
-                TransactionID=record.ProductionID + '34',
-                Transport_Flag=34,
-                TransactionStartUCLLink="UCL_sell_begin",)
+            elif dict_get['From'].find("加工") >= 0:                                               #模糊查询 说明运输员在加工运输阶段
+                print("开始更新加工数据 环节标志32")
+                list1 = models.TransportData.objects.filter(TransactionPersonID=person_id,State=1)  #取出本次运输的全部加工商品记录
+                for record in list1:
+                    models.TransportData.objects.filter(ProductionID=record.ProductionID).update(  #填写流通编号
+                        TransactionID=record.ProductionID + '32',
+                        Transport_Flag=32,
+                        Flag=2,
+                        TransactionStartUCLLink=Beginpath,)
+            else:
+                print("数据填写不规范")
+
+            return HttpResponse("起点数据填写完成")
+        else:
+            return HttpResponse("该运输员没有运输数据，请确认已经扫码录入完毕")
     else:
-        print("数据填写不规范")
-
-    return HttpResponse("起点数据填写完成")
+        return HttpResponse("信息填写错误，没有这个运输员")
 
 '''
 @运输数据 到达
@@ -170,13 +227,25 @@ def Transport_start(request):
 4、填写运输数据表（到达时间）
 '''
 def Transport_end(request):
-    dict_get = json.loads(request.body)                                                # 获得字典
-    peoson_id=dict_get['TransactionPersonID']                                          # 解析运输人员id
-    models.TransportData.objects.filter(TransactionPersonID=peoson_id,Flag=1).update(  # 更新前端推送内容的到达时间
-        TransactionEndTime=dict_get['TransactionEndTime'],
-        Flag=2, # 标志商品到达环节终点
-        TransactionEndUCLLink="UCL_end",
+    dict_get0 = json.loads(request.body)                                                # 获得字典
+    PackedUcl = dict_get0['ucl']
+    serialnumber = dict_get0['serialnumber']
+    productionId = dict_get0['productionId']  #
+    flag = dict_get0['flag']
 
-    )
-    transpoter_release(peoson_id)                                                      # 运输人员状态释放
-    return HttpResponse("终点数据上传完成")
+    dict_get, path = ucl.unpack(PackedUcl, 'transport', productionId, serialnumber)  # 解包，返回解包地址
+    print(dict_get)
+    peoson_id=dict_get['TransactionPersonID']                                        # 解析运输人员id
+    transpoter_release(peoson_id)  # 运输人员状态释放
+    RelatedRecorder = models.TransportData.objects.filter(TransactionPersonID=peoson_id,State=1).update(TransactionEndTime=dict_get['TransactionEndTime'],
+                                                         State=2,TransactionEndUCLLink=path)
+    if RelatedRecorder:
+            # str = Recorder.toJSON()
+            # uclstr,EndPath = ucl.pack(str,flag,Recorder.ProductionID,serialnumber)
+            # Recorder.objects.update(TransactionEndUCLLink=EndPath)
+            # print(uclstr)
+        return HttpResponse("终点数据上传完成")
+    else:
+        return HttpResponse("终点数据上传失败")
+
+
