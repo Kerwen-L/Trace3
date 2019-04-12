@@ -194,6 +194,7 @@ def input_sheep(request):
         obj.save()
 
     models.UUID_Sheep.objects.create(UUID=UUID, PB_Flag=PB_Flag, RecordID=RecordID)
+
     dic2 = {}
     dic2["RecordID"] = RecordID
     dic2["ConsumerId"] = ConsumerId

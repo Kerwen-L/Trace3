@@ -433,7 +433,9 @@ class SellData(models.Model):
 '''
 
 
-
+class sheep_url(models.Model):
+    RecordID = models.CharField(max_length=25, null=True)
+    qr_code = models.CharField(max_length=88, null=True)
 
 
 
