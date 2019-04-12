@@ -109,24 +109,25 @@ def ProcessData_Add(request):
             # 对应的加工者的加工次数+1，并保存
             person = demo1.get("ConsumerId")
             temp1 = models.ProcessorRegistry.objects.get(ConsumerId = person)  # 在数据库查找对象temp1
-            temp1.ProcessorCounts = temp1.ProcessorCounts + 1 #对应的加工人员的加工次数+1
+            # 对应的加工人员的加工次数+1
+            temp1.ProcessorCounts = temp1.ProcessorCounts + 1
             temp1.save()
-            #生成对应的二维码
+            # 生成对应的二维码
             img = qrcode.make('{ProductionID:'+demo1.get("ReproductionID")+'}')
             img.save("qrcode_process/"+demo1.get("ReproductionID")+".png")
-            url1="223.3.90.242"
+            url1 = "223.3.93.189"
 
-            #图片对应的地址
+            # 图片对应的地址
             src="http://"+url1+":8000/process/qrcode_process/"+demo1.get("ReproductionID")+".png"
 #            src = "http://"+url1+":8000/process/qrcode_process/1234567801010101.png"
             print("src is %s"%(src))
-            #添加 加工数据表添加QRcode
+            # 添加加工数据表添加QRcode
             ddd = models.ProcessData.objects.get(ReproductionID=demo1.get("ReproductionID"))
             print(demo1.get("ReproductionID"))
             ddd.QRCodeLink = demo1.get("ReproductionID")
             ddd.save()
             print("加工数据添加成功")
-            #return HttpResponse("加工数据上传数据库成功!")
+            # return HttpResponse("加工数据上传数据库成功!")
             return HttpResponse(src)
         except ObjectDoesNotExist:
             return HttpResponse("加工数据添加失败")
