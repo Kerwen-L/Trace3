@@ -178,7 +178,7 @@ def complete_supermarket(request):
 
 def register_commodity(request):
     if request.method == "POST":
-        '''
+
         data = json.loads(request.body)
         print(data)
         uclstr = data['ucl']
@@ -190,8 +190,8 @@ def register_commodity(request):
         print(contentdict)
         print(uclpath)
         models.SellData(**contentdict).save()
-        '''
-        models.SellData(**json.loads(request.body)).save()
+
+        # models.SellData(**json.loads(request.body)).save()
         print("测试：已录入商品信息")
     return HttpResponse("测试：已录入商品信息")
 
