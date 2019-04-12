@@ -173,7 +173,7 @@ def input_sheep(request):
     dic = json.loads(request.body.decode())
     UUID = dic["UUID"]
     PB_Flag = 1
-    ConsumerId = dic["ConsumerId"]  # 用来确认羊是哪个生产者录入的
+    ConsumerId = dic["ConsumerId"]  # 用来确认羊是哪个生产者录入的,实际上数据里羊和生产者并没有串起来
     # RecordID:  7位：企业Id X（8 + 2）位：生产内容Id + 00 8位：日期
     # 生产内容ID是怎么生成的
     # ProductionId = "假设还是2位省份+6位自增全局变量"
@@ -200,6 +200,7 @@ def input_sheep(request):
     img = qrcode.make(str(dic2))  # eval(str)
     img.save("qrcode_origin/"+RecordID+".png")
     url = "http://223.3.79.211:8000/user/qrcode_origin/"+RecordID+".png"
+    models.sheep_url.objects.create(RecordID=RecordID, qr_code=url)  # 把羊和该羊的二维码对应起来
     return HttpResponse(url)
     # http://223.3.79.211:8000/user/qrcode_origin/RecordID.png
 
@@ -209,7 +210,6 @@ def test(request):
     idcountsheep += 1
     print(idcountsheep)
     return HttpResponse("test ing")
-
 
 
 
