@@ -13,7 +13,6 @@ from django.shortcuts import HttpResponse
 from datetime import datetime
 from app.quarantine import quarantinedata
 from app.quarantine import quarantiner
-
 import hashlib
 from django.shortcuts import render_to_response
 from django.template import Context
@@ -24,14 +23,19 @@ from app.ucl import ucl
 
 def quarantine_submit(request):
     if request.method == "POST":
+        # 接收HTTP请求，解析出JSON格式数据
         data = json.loads(request.body)
-        print(data)
         uclstr = data['ucl']
         flag = data['flag']
         serialnumber = data['serialnumber']
         productionId = data['productionId']
-        print("uclStrBase64:" + uclstr)
-        [contentdict, uclpath] = ucl.unpack(uclstr, flag, productionId, serialnumber)
+
+        # UCL解包，在本地服务器存储，返回内容与ucl字典形式
+        [contentdict, ucldict, uclpath] = ucl.unpack(uclstr, flag, productionId, serialnumber)
+        print("UCL解包成功, 内容对象:")
+        print(contentdict)
+        # 将UCL存入数据库
+        ucl.save_in_db(ucldict, flag, uclstr, uclpath)
         print(contentdict)
         print(uclpath)
         quarantinedata.submit(contentdict)

@@ -1,11 +1,19 @@
 #coding=utf-8
+from __future__ import unicode_literals
+
+from django.forms import model_to_dict
+
+from app import models
 import subprocess
 import json
 import os
 import codecs
 import base64
+from app import models
+from django.shortcuts import HttpResponse
 
-def unpack(uclstr, link= 'quarantine', productionid='3000000001', serial='40'):
+
+def unpack(uclstr, flag= 'quarantine', productionid='3000000001', serial='40'):
     """
     ucl包解包函数
     link 环节名称，如‘quarantine’
@@ -19,7 +27,7 @@ def unpack(uclstr, link= 'quarantine', productionid='3000000001', serial='40'):
     """
     # 构造UCL存储路径, 并将UCL字符串存入txt文件
     ucldir = os.getcwd() + "\\app\\ucl\\"
-    savedir = ucldir + "UCLPack\\" + link + "\\" + productionid
+    savedir = ucldir + "UCLPack\\" + flag + "\\" + productionid
     if (os.path.exists(savedir ) == False):
         os.makedirs(savedir)
     uclpath = savedir + "\\" + serial + '.txt'
@@ -38,10 +46,10 @@ def unpack(uclstr, link= 'quarantine', productionid='3000000001', serial='40'):
     # 字典形式返回内容对象域数据
     ucldict = json.loads(jsonstr)
     contentdict = json.loads(ucldict['cdps']['content'])
-    return contentdict, uclpath
+    return contentdict,ucldict, uclpath
 
 
-def pack(jsonstr):
+def pack(jsonstr, flag, productionid, serial):
     # 示例 jsonstr = "{\"cdps\":{\"content\":{\"QuarantineID\":\"acx0\",\"QuarantineBatch\":\"axc023\",\"QuarantinePersonID\":\"09093\",\"ProductionId\":\"123\",\"QuarantineLocation\":\"nanjing\",\"Applicant\":\"wang\",\"QuarantinerName\":\"lin\",\"QuarantineRes\":\"***\"}}}"
     byte_base64 = base64.b64encode(bytes(jsonstr, encoding='utf-8'))
     jsonstr_base64 = str(byte_base64, 'utf-8')
@@ -53,13 +61,72 @@ def pack(jsonstr):
     uclstr = str(res.stdout.readline(), encoding='gbk')
     print(uclstr)
     res.terminate()
+
+    # 构造UCL存储路径, 并将UCL字符串存入txt文件
+    ucldir = os.getcwd() + "\\app\\ucl\\"
+    savedir = ucldir + "UCLPack\\" + flag + "\\" + productionid
+    if (os.path.exists(savedir ) == False):
+        os.makedirs(savedir)
+    uclpath = savedir + "\\" + serial + '.txt'
+    with codecs.open(uclpath, 'w') as f:
+        f.write(uclstr.strip())
+        print('UCL存储本地服务器成功!')
+
     return uclstr
 
-def request_to_uclstr(jsondata):
-    link = jsondata['link']
-    uclstr = jsondata['ucl']
-    flag = jsondata['flag']
+def get_ucl(request):
+    if request.method == "GET":
+        production_id = request.GET.get("ProductionID")
+        res = models.UCLData.objects.get(ProductionId=production_id, isLatest=1)
+
+        if res is None:
+            return "No result found"
+        ret = model_to_dict(res)
+        for key, value in ret.items():
+            ret[key] = str(value)
+        return HttpResponse(json.dumps(ret), content_type="application/json")
+
+def save_in_db(ucldict, flag, uclstr, uclpath):
+
+    productionID = ucldict['cgps']['contentID']
+    serialnumber = None
+    ruclID = -1
+
+    if('cgps' in ucldict):
+        if('contentID' in ucldict['cgps']):
+            productionID = ucldict['cgps']['contentID']
+    else:
+        print("No CGPS PropertySets in the UCL")
+
+
+    if('cdps' in ucldict):
+        serialnumber = ucldict['cdps']['tag']
+        if('relatedUCL' in ucldict['cdps']):
+            # 获取关联UCL
+            relatedUCL = ucldict['cdps']['relatedUCL']
+            relatedPid = relatedUCL.split(';')[0]
+            relatedSn = relatedUCL.split(';')[1]
+
+            # 当前productionID对应的产品出现新的UCL包, 更新标识
+            rucl = models.UCLData.objects.get(ProductionId=relatedPid, SerialNum=relatedSn)
+            ruclID = rucl.id
+            if (rucl.ProductionId == productionID):
+                rucl.isLatest = 0
+                rucl.save()
+    else:
+        print("No CDPS PropertySets in the UCL")
 
 
 
-    return uclstr, link
+
+    # 构建存入UCL数据表的数据字典
+    data = {}
+    data['ProductionId'] = productionID
+    data['UCLPack'] = uclstr
+    data['Flag'] = int(flag)
+    data['isLatest'] = 1
+    data['SerialNum'] = int(serialnumber)
+    data['UCLSrc'] = uclpath
+    data['RelatedUCLId'] = ruclID
+    models.UCLData(**data).save()
+    print('UCL存储数据库成功!')
