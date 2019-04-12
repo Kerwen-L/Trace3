@@ -3,9 +3,8 @@ from django.shortcuts import HttpResponse, render, redirect
 from app import models
 from django.forms.models import model_to_dict
 from django.core.exceptions import ObjectDoesNotExist
+from app.ucl import ucl
 from django.shortcuts import render_to_response
-from django.template import Context
-# from django.utils import simplejson
 import json
 from PIL import Image
 import qrcode #导入包
@@ -18,30 +17,7 @@ qr = qrcode.QRCode(
     border=4,    #控制边框包含的格子数
 )
 
-'''
-#人员-添加 #有问题 数据迁移会在consumer新建一行数据
-def Processor_Add(request):
-    if request.method == "POST":
-        try:
-            demo=json.loads(request.body)
-            demo_id = demo.get("ConsumerID")#获得从消费者到加工者id
-            temp1 = models.ConsumerRegistry.objects.get(ConsumerID=demo_id) #获得在消费者数据表的内容
-            temp3 = models.ProcessorRegistry
-            temp3.ConsumerId=temp1.ConsumerId
-            temp3.ConsumerName=temp1.ConsumerName
-            temp3.ContactNo=temp1.ContactNo
-            temp3.RegisterTimeConsumer=temp1.RegisterTimeConsumer
-            temp3.Password=temp1.Password
-            temp3.CharacterFlag=1
-            temp3().save()
-            print("加工人员数据添加成功")
-            return HttpResponse("加工人员数据上传数据库成功!")
-        except ObjectDoesNotExist:
-            return HttpResponse("加工人员数据添加失败")
-    else:
-        return HttpResponse("mothod应该为POST")
-'''
-
+# 加工人员查询
 def Processor_Inquiry(request):
     if request.method == "GET":
         consumer_id = request.GET.get("ConsumerId")  # 获得加工人员的processor_idTrace2@223.3.79.211
@@ -61,19 +37,16 @@ def Processor_Inquiry(request):
     else:
         return HttpResponse("mothod应该为GET")
 
-
-
 # 人员-删除
 def Processor_Delete(request):
     if request.method == "POST":
         consumer_id = request.GET.get("ConsumerId")  #获得id
-        temp=models.ProcessorRegistry.objects.get(ConsumerId=consumer_id)
+        temp = models.ProcessorRegistry.objects.get(ConsumerId=consumer_id)
         temp.delete()
         print("加工人员数据删除成功!")
         return HttpResponse("加工人员数据删除成功!")
     else:
         return HttpResponse("mothod应该为POST")
-
 
 # 人员-更改
 def Processor_Update(request):
@@ -90,7 +63,7 @@ def Processor_Update(request):
             temp1.HC4foodCertificationNo = demo.get("HC4foodCertificationNo")  # 更改食品从业人员健康证明编号
             temp1.HC4foodCertificationSrc = demo.get("HC4foodCertificationSrc")  # 更改食品从业人员健康证明图片
             temp1.Password = demo.get("Password")  # 更改密码
-            temp1.CharacterFlag=1
+            temp1.CharacterFlag = 3
             temp1.save()
             print("加工人员数据更改成功")
             return HttpResponse("加工人员数据更改成功")
@@ -99,35 +72,50 @@ def Processor_Update(request):
     else:
         return HttpResponse("mothod应该为POST")
 
-
 # 结果-添加
 def ProcessData_Add(request):
     if request.method == "POST":
         try:
-            models.ProcessData(**json.loads(request.body)).save()
-            demo1 = json.loads(request.body)
-            # 对应的加工者的加工次数+1，并保存
+            # UCL解包
+            data = json.loads(request.body)
+            print(data)
+            uclstr = data['ucl']
+            flag = data['flag']
+            serialnumber = data['serialnumber']
+            productionId = data['productionId']
+            print("uclStrBase64:" + uclstr)
+            [contentdict, uclpath] = ucl.unpack(uclstr, flag, productionId, serialnumber)
+            print(contentdict)
+            print(uclpath)
+#            models.SellData(**contentdict).save()
+            models.ProcessData(**contentdict).save()
+#            models.ProcessData(**json.loads(request.body)).save()
+
+            # 加工人员对应加工次数+1
+            demo1 = contentdict
+#            demo1 = json.loads(request.body)
             person = demo1.get("ConsumerId")
-            temp1 = models.ProcessorRegistry.objects.get(ConsumerId = person)  # 在数据库查找对象temp1
-            # 对应的加工人员的加工次数+1
+            temp1 = models.ProcessorRegistry.objects.get(ConsumerId=person)  # 在数据库查找对象temp1
             temp1.ProcessorCounts = temp1.ProcessorCounts + 1
             temp1.save()
-            # 生成对应的二维码
+
+
+            # 生成记录对应的二维码
             img = qrcode.make('{ProductionID:'+demo1.get("ReproductionID")+'}')
             img.save("qrcode_process/"+demo1.get("ReproductionID")+".png")
             url1 = "223.3.93.189"
 
             # 图片对应的地址
-            src="http://"+url1+":8000/process/qrcode_process/"+demo1.get("ReproductionID")+".png"
-#            src = "http://"+url1+":8000/process/qrcode_process/1234567801010101.png"
+            src = "http://"+url1+":8000/process/qrcode_process/"+demo1.get("ReproductionID")+".png"
             print("src is %s"%(src))
-            # 添加加工数据表添加QRcode
+
+            # 加工数据表添加QRcode
             ddd = models.ProcessData.objects.get(ReproductionID=demo1.get("ReproductionID"))
             print(demo1.get("ReproductionID"))
             ddd.QRCodeLink = demo1.get("ReproductionID")
             ddd.save()
+
             print("加工数据添加成功")
-            # return HttpResponse("加工数据上传数据库成功!")
             return HttpResponse(src)
         except ObjectDoesNotExist:
             return HttpResponse("加工数据添加失败")
@@ -140,7 +128,7 @@ def ProcessData_Inquiry(request):
     if request.method == "GET":  # 这里用get比post方便，因为羊id直接就在URL里了
         production_id = request.GET.get("ProductionID")  # 获得加工结果的process_id
         temp = models.ProcessData.objects.filter(ProductionID=production_id)
-        ret=[]
+        ret = []
         if(temp):
             for sample in temp:
                 i = model_to_dict(sample)
@@ -152,19 +140,3 @@ def ProcessData_Inquiry(request):
             return HttpResponse("未查询到符合条件的数据")
     else:
         return HttpResponse("mothod应该为GET")
-'''
-# 运输申请处理
-def Trans_Submit(request):  # 放回运输人员的联系方式
-    if request.method == "POST":
-        try:
-            models.ProcessData(**json.loads(request.body)).save()
-            demo1 = json.loads(request.body)
-            person = demo1.get("ConsumerID")
-            temp1 = models.ProcessorRegistry.objects.get(ConsumerID=person)  # 找到加工人员temp1
-            print("加工人员申请运输")
-            return HttpResponse("申请成功!")
-        except ObjectDoesNotExist:
-            return HttpResponse("申请失败")
-    else:
-        return HttpResponse("mothod应该为POST")
-'''
