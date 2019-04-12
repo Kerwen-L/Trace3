@@ -147,14 +147,14 @@ class ProducerRegistry(ConsumerRegistry):
 class TransporterRegistry(ConsumerRegistry):
     #TransporterId=models.CharField(max_length=15)
     #TransporterName=models.CharField(max_length=10)
-    IDNo=models.CharField(max_length=18)                       # 运输人员身份证号，18位
+    IDNo=models.CharField(max_length=18, null=True)                       # 运输人员身份证号，18位
     #ContactNo=models.BigIntegerField()
-    RegisterTime=models.DateField(default=date.today)
-    WorkPlaceID=models.CharField(max_length=30)
-    PhotoSrc=models.CharField(max_length=40)
-    RoadTransportQCNo=models.BigIntegerField()
-    RoadTransportQCSrc=models.CharField(max_length=40)
-    TransportCounts=models.IntegerField(default=0)
+    RegisterTime=models.DateField(default=date.today, null=True)
+    WorkPlaceID=models.CharField(max_length=30, null=True)
+    PhotoSrc=models.CharField(max_length=40, null=True)
+    RoadTransportQCNo=models.BigIntegerField(null=True)
+    RoadTransportQCSrc=models.CharField(max_length=40, null=True)
+    TransportCounts=models.IntegerField(default=0, null=True)
     Flag = models.IntegerField(default=0)
     #Password=models.CharField(max_length=30)
     PrivateKey = models.CharField(max_length=1024, null=True)  # 私钥
@@ -251,12 +251,12 @@ class SellerRegistry(ConsumerRegistry):
     # SellerName = models.CharField(max_length=10)  # 姓名
     # SellerName = ConsumerRegistry.ConsumerName
     # IDNo = models.BigIntegerField()                         #身份证号
-    IDNo = models.CharField(max_length=18)                          # 身份证号
+    IDNo = models.CharField(max_length=18, null=True)                          # 身份证号
     # ContactNo = models.BigIntegerField()                    #联系方式
     # RegisterTime = models.DateTimeField()  # 销售人员注册时间
-    RegisterTime = models.DateField(default=date.today)             # 销售人员注册时间
-    WorkPlaceID = models.CharField(max_length=50)                   # 工作单位ID(企业注册ID)
-    PhotoSrc = models.CharField(max_length=100)                     # 销售人员证件照地址
+    RegisterTime = models.DateField(default=date.today, null=True)             # 销售人员注册时间
+    WorkPlaceID = models.CharField(max_length=50, null=True)                   # 工作单位ID(企业注册ID)
+    PhotoSrc = models.CharField(max_length=100, null=True)                     # 销售人员证件照地址
     # Password = models.CharField(max_length=30)              #登陆密码(需加密保存)
     PrivateKey = models.CharField(max_length=1024, null=True)  # 私钥
     PublicKey = models.CharField(max_length=1024, null=True)  # 公钥
