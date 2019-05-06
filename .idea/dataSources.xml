@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="Trace3@223.3.79.211" uuid="52a583b0-a0fe-4b73-94ce-ff29b1f38ae5">
+    <data-source source="LOCAL" name="Trace3@223.3.83.51" uuid="52a583b0-a0fe-4b73-94ce-ff29b1f38ae5">
       <driver-ref>mysql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://223.3.79.211:3306/Trace3</jdbc-url>
+      <jdbc-url>jdbc:mysql://223.3.83.51:3306/Trace3</jdbc-url>
       <driver-properties>
         <property name="autoReconnect" value="true" />
         <property name="zeroDateTimeBehavior" value="convertToNull" />
@@ -15,11 +15,11 @@
         <property name="yearIsDateType" value="false" />
       </driver-properties>
     </data-source>
-    <data-source source="LOCAL" name="Trace2@223.3.79.211" uuid="f6a5842f-5ed5-458f-bce4-b915d4f20c90">
-      <driver-ref>mysql</driver-ref>
+    <data-source source="LOCAL" name="Trace2@223.3.93.158" uuid="f6a5842f-5ed5-458f-bce4-b915d4f20c90">
+      <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
-      <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://223.3.79.211:3306/Trace2</jdbc-url>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://223.3.93.158:3306/Trace2?useSSL=false&amp;serverTimezone=Hongkong&amp;characterEncoding=utf-8&amp;autoReconnect=true</jdbc-url>
       <driver-properties>
         <property name="autoReconnect" value="true" />
         <property name="zeroDateTimeBehavior" value="convertToNull" />

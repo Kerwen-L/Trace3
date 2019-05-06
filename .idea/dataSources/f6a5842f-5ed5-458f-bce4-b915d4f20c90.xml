@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dataSource name="Trace2@223.3.79.211">
-  <database-model serializer="dbm" dbms="MYSQL" family-id="MYSQL" format-version="4.14">
+<dataSource name="Trace2@223.3.93.158">
+  <database-model serializer="dbm" dbms="MYSQL" family-id="MYSQL" format-version="4.15">
     <root id="1">
       <ServerVersion>5.6.43</ServerVersion>
       <DefaultEngine>InnoDB</DefaultEngine>
@@ -1164,7 +1164,7 @@
     </column>
     <column id="313" parent="240" name="RegisterTime">
       <Position>8</Position>
-      <DataType>datetime(6)|0s</DataType>
+      <DataType>varchar(30)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="314" parent="240" name="OperatingPlace">
@@ -1199,7 +1199,7 @@
     </column>
     <column id="320" parent="240" name="BLicenseDeadline">
       <Position>15</Position>
-      <DataType>date|0s</DataType>
+      <DataType>varchar(30)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="321" parent="240" name="PLicenseNo">
@@ -1214,7 +1214,7 @@
     </column>
     <column id="323" parent="240" name="PLicenseDeadline">
       <Position>18</Position>
-      <DataType>date|0s</DataType>
+      <DataType>varchar(30)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="324" parent="240" name="AEPCertificateNo">
@@ -2152,13 +2152,13 @@
     </column>
     <column id="493" parent="251" name="TransactionStartUCLLink">
       <Position>10</Position>
-      <DataType>varchar(50)|0s</DataType>
+      <DataType>varchar(150)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="494" parent="251" name="TransactionEndUCLLink">
       <Position>11</Position>
-      <DataType>varchar(50)|0s</DataType>
+      <DataType>varchar(150)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>

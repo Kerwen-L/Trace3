@@ -81,7 +81,7 @@ DATABASES = {
         'NAME': 'Trace2',
         'USER': 'root',
         'PASSWORD': '123456',
-        'HOST': '223.3.79.211',
+        'HOST': '223.3.93.158',
         'PORT': '3306'
     }
 }
