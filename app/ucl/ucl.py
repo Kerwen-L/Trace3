@@ -9,9 +9,18 @@ import json
 import os
 import codecs
 import base64
+import platform
 from app import models
 from django.shortcuts import HttpResponse
 
+def getEncoding():
+    if(platform.system() == 'Windows'):
+        encode_way = 'gbk'
+    elif(platform.system() == 'Linux'):
+        encode_way = 'utf-8'
+    else:
+        encode_way = None
+    return encode_way
 
 def unpack(uclstr, flag= 'quarantine', productionid='3000000001', serial='40'):
     """
@@ -26,11 +35,11 @@ def unpack(uclstr, flag= 'quarantine', productionid='3000000001', serial='40'):
     }
     """
     # 构造UCL存储路径, 并将UCL字符串存入txt文件
-    ucldir = os.getcwd() + "\\app\\ucl\\"
-    savedir = ucldir + "UCLPack\\" + flag + "\\" + productionid
+    ucldir = os.getcwd() + "/app/ucl/"
+    savedir = ucldir + "UCLPack/" + flag + "/" + productionid
     if (os.path.exists(savedir ) == False):
         os.makedirs(savedir)
-    uclpath = savedir + "\\" + serial + '.txt'
+    uclpath = savedir + "/" + serial + '.txt'
     with codecs.open(uclpath, 'w') as f:
         f.write(uclstr.strip())
 
@@ -39,35 +48,45 @@ def unpack(uclstr, flag= 'quarantine', productionid='3000000001', serial='40'):
     unpack_cmd = [cmd, uclpath]
     new_cmd = " ".join(unpack_cmd)
     res = subprocess.Popen(new_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    jsonstr = str(res.stdout.readline(), encoding='gbk')
-    print(jsonstr)
-    res.terminate()
 
-    # 字典形式返回内容对象域数据
-    ucldict = json.loads(jsonstr)
-    contentdict = json.loads(ucldict['cdps']['content'])
-    return contentdict,ucldict, uclpath
+    encoding_str = getEncoding()
+    if(encoding_str):
+        jsonstr = str(res.stdout.readline(), encoding=encoding_str)
+        print(jsonstr)
+        res.terminate()
+
+        # 字典形式返回内容对象域数据
+        ucldict = json.loads(jsonstr)
+        contentdict = json.loads(ucldict['cdps']['content'])
+        return contentdict, ucldict, uclpath
+    else:
+        raise OSError('Unsupported system')
 
 
 def pack(jsonstr, flag, productionid, serial):
     # 示例 jsonstr = "{\"cdps\":{\"content\":{\"QuarantineID\":\"acx0\",\"QuarantineBatch\":\"axc023\",\"QuarantinePersonID\":\"09093\",\"ProductionId\":\"123\",\"QuarantineLocation\":\"nanjing\",\"Applicant\":\"wang\",\"QuarantinerName\":\"lin\",\"QuarantineRes\":\"***\"}}}"
     byte_base64 = base64.b64encode(bytes(jsonstr, encoding='utf-8'))
     jsonstr_base64 = str(byte_base64, 'utf-8')
-    savedir = os.getcwd() + "\\app\\ucl\\"
+    savedir = os.getcwd() + "/app/ucl/"
     cmd = "java -jar " + savedir + "UCL_Trace.jar -pack"
     pack_cmd = [cmd, jsonstr_base64]
     new_cmd = " ".join(pack_cmd)
     res = subprocess.Popen(new_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    uclstr = str(res.stdout.readline(), encoding='gbk')
+
+    encoding_str = getEncoding()
+    if(encoding_str):
+        uclstr = str(res.stdout.readline(), encoding=encoding_str)
+    else:
+        raise OSError('Unsupported system')
     print(uclstr)
     res.terminate()
 
     # 构造UCL存储路径, 并将UCL字符串存入txt文件
-    ucldir = os.getcwd() + "\\app\\ucl\\"
-    savedir = ucldir + "UCLPack\\" + flag + "\\" + productionid
+    ucldir = os.getcwd() + "/app/ucl/"
+    savedir = ucldir + "UCLPack/" + flag + "/" + productionid
     if (os.path.exists(savedir ) == False):
         os.makedirs(savedir)
-    uclpath = savedir + "\\" + serial + '.txt'
+    uclpath = savedir + "/" + serial + '.txt'
     with codecs.open(uclpath, 'w') as f:
         f.write(uclstr.strip())
         print('UCL存储本地服务器成功!')
