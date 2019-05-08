@@ -18,11 +18,11 @@ def unpack(uclstr, link= 'quarantine', productionid='3000000001', serial='40'):
     }
     """
     # 构造UCL存储路径, 并将UCL字符串存入txt文件
-    ucldir = os.getcwd() + "\\app\\ucl\\"
-    savedir = ucldir + "UCLPack\\" + link + "\\" + productionid
+    ucldir = os.getcwd() + "/app/ucl/"
+    savedir = ucldir + "UCLPack/" + link + "/" + productionid
     if (os.path.exists(savedir ) == False):
         os.makedirs(savedir)
-    uclpath = savedir + "\\" + serial + '.txt'
+    uclpath = savedir + "/" + serial + '.txt'
     with codecs.open(uclpath, 'w') as f:
         f.write(uclstr.strip())
 
@@ -31,7 +31,7 @@ def unpack(uclstr, link= 'quarantine', productionid='3000000001', serial='40'):
     unpack_cmd = [cmd, uclpath]
     new_cmd = " ".join(unpack_cmd)
     res = subprocess.Popen(new_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    jsonstr = str(res.stdout.readline(), encoding='gbk')
+    jsonstr = str(res.stdout.readline(), encoding='utf-8')
     print(jsonstr)
     res.terminate()
 
@@ -45,7 +45,7 @@ def pack(jsonstr):
     # 示例 jsonstr = "{\"cdps\":{\"content\":{\"QuarantineID\":\"acx0\",\"QuarantineBatch\":\"axc023\",\"QuarantinePersonID\":\"09093\",\"ProductionId\":\"123\",\"QuarantineLocation\":\"nanjing\",\"Applicant\":\"wang\",\"QuarantinerName\":\"lin\",\"QuarantineRes\":\"***\"}}}"
     byte_base64 = base64.b64encode(bytes(jsonstr, encoding='utf-8'))
     jsonstr_base64 = str(byte_base64, 'utf-8')
-    savedir = os.getcwd() + "\\app\\ucl\\"
+    savedir = os.getcwd() + "/app/ucl/"
     cmd = "java -jar " + savedir + "UCL_Trace.jar -pack"
     pack_cmd = [cmd, jsonstr_base64]
     new_cmd = " ".join(pack_cmd)
