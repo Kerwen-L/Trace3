@@ -135,3 +135,4 @@ QRCODE_ORIGIN_ROOT = os.path.join(BASE_DIR, 'qrcode_origin')     # 设置静态�
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 QRCODE_PROCESS_URL = '/qrcode_process/'
 QRCODE_PROCESS_ROOT = os.path.join(BASE_DIR, 'qrcode_process')     # 设置静态文件路径为主目录下的media文件夹
+

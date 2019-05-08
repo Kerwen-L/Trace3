@@ -32,5 +32,4 @@ urlpatterns = [
     # 指向sell的urls文件
     url(r'^sell/', include('app.sell.urls'))
 
-
 ]
