@@ -186,7 +186,7 @@ def register_commodity(request):
         serialnumber = data['serialnumber']
         productionId = data['productionId']
         print("uclStrBase64:" + uclstr)
-        [contentdict, uclpath] = ucl.unpack(uclstr, flag, productionId, serialnumber)
+        [contentdict, _, uclpath] = ucl.unpack(uclstr, flag, productionId, serialnumber)
         print(contentdict)
         print(uclpath)
         models.SellData(**contentdict).save()
