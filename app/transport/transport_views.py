@@ -240,8 +240,8 @@ def Transport_end(request):
     print(dict_get)
     peoson_id=dict_get['TransactionPersonID']                                        # 解析运输人员id
     transpoter_release(peoson_id)  # 运输人员状态释放
-    RelatedRecorder = models.TransportData.objects.filter(TransactionPersonID=peoson_id,State=1,ProductionID=productionId).update(
-                                                          TransactionEndTime=dict_get['TransactionEndTime'],State=2,TransactionEndUCLLink=path)
+    RelatedRecorder = models.TransportData.objects.filter(TransactionPersonID=peoson_id,State=1,ProductionID=productionId).update(TransactionEndTime=dict_get['TransactionEndTime'],
+                                                         State=2,TransactionEndUCLLink=path)
     if RelatedRecorder:
             # str = Recorder.toJSON()
             # uclstr,EndPath = ucl.pack(str,flag,Recorder.ProductionID,serialnumber)
@@ -249,6 +249,6 @@ def Transport_end(request):
             # print(uclstr)
         return HttpResponse("终点数据上传完成")
     else:
-        return HttpResponse("终点数据上传失败，请检查运输员id或者商品id")
+        return HttpResponse("终点数据上传失败，没有该条记录")
 
 
