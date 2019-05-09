@@ -152,6 +152,9 @@ def product_enter(request):
 3、在运输数据表中 把与该运输员id匹配且标志为0 的商品
 4、填写运输数据表（来源、去向、开始时间、商品标志）
 5、生成环节标志、运输批次、流通编号（生产内容id+环节标志）
+6、为什么之前的批量填充改为单次填充了呢？因为涉及到反向查询的问题，每个生产内容id不一样，其ucl就不一样，
+   所以ucl不可能一批都一样，就有两种方案，一是每次前端发一条记录，后端填写一条，另外的一种思路是每次前
+   端发多条数据。之前是为了测试使用ucl，没有考虑周全，现已经修改。
 '''
 def Transport_start(request):
     if request.method=="POST":
@@ -170,7 +173,7 @@ def Transport_start(request):
     temp_person = models.TransporterRegistry.objects.filter(ConsumerId=dict_get['TransactionPersonID'])  # 找到这个运输员相关的记录
     if temp_person:
         print("运输员的名字为: "+temp_person[0].ConsumerName) #20190424 单个存储
-        flag = models.TransportData.objects.filter(TransactionPersonID=person_id,State=0,ProductionID=productionId) #过滤条件新增生产内容ID
+        flag = models.TransportData.objects.filter(TransactionPersonID=person_id,State=0,ProductionID=productionId) #过滤条件新增生产内容ID，总的条件是；人+商品id+商品状态
         if flag:  # 先填写基础数据
             models.TransportData.objects.filter(TransactionPersonID=person_id,State=0,ProductionID=productionId).update(      # 更新前端推送内容到运输数据表
                 From=dict_get['From'],
@@ -237,8 +240,8 @@ def Transport_end(request):
     print(dict_get)
     peoson_id=dict_get['TransactionPersonID']                                        # 解析运输人员id
     transpoter_release(peoson_id)  # 运输人员状态释放
-    RelatedRecorder = models.TransportData.objects.filter(TransactionPersonID=peoson_id,State=1,ProductionID=productionId).update(TransactionEndTime=dict_get['TransactionEndTime'],
-                                                         State=2,TransactionEndUCLLink=path)
+    RelatedRecorder = models.TransportData.objects.filter(TransactionPersonID=peoson_id,State=1,ProductionID=productionId).update(
+                                                          TransactionEndTime=dict_get['TransactionEndTime'],State=2,TransactionEndUCLLink=path)
     if RelatedRecorder:
             # str = Recorder.toJSON()
             # uclstr,EndPath = ucl.pack(str,flag,Recorder.ProductionID,serialnumber)
@@ -246,6 +249,6 @@ def Transport_end(request):
             # print(uclstr)
         return HttpResponse("终点数据上传完成")
     else:
-        return HttpResponse("终点数据上传失败，没有该条记录")
+        return HttpResponse("终点数据上传失败，请检查运输员id或者商品id")
 
 
